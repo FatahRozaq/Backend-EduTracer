@@ -9,6 +9,12 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::get('/guru/tugas', [TugasController::class, 'index']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+
+Route::get('/guru/tugas', [TugasController::class, 'index']);
+Route::get('/guru/tugas/{id}', [TugasController::class, 'show']);
+Route::post('/guru/tugas', [TugasController::class, 'store']);
+Route::put('/guru/tugas/{id}', [TugasController::class, 'update']);
+Route::delete('/guru/tugas/{id}', [TugasController::class, 'destroy']);
+

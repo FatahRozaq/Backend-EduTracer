@@ -65,4 +65,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(User::class, 'partner_id');
     }
+
+    public function kelas()
+    {
+        return $this->belongsToMany(Kelas::class, 'kelas_user', 'id_user', 'id_kelas');
+    }
 }

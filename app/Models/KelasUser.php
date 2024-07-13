@@ -17,13 +17,11 @@ class KelasUser extends Model
         'id_kelas',
     ];
 
-    // Tambahkan relasi ke model User
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
     }
 
-    // Tambahkan relasi ke model Kelas
     public function kelas()
     {
         return $this->belongsTo(Kelas::class, 'id_kelas');

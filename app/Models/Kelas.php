@@ -27,7 +27,7 @@ class Kelas extends Model
 
     public function user()
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class, 'kelas_user', 'id_kelas', 'id_user');
     }
    
 }

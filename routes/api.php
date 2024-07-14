@@ -28,6 +28,9 @@ Route::get('/test', function () {
     return response()->json(['message' => 'Server is running']);
 });
 
+Route::middleware('auth:sanctum')->put('/auth/user', [AuthController::class, 'updateUser']);
+Route::middleware('auth:sanctum')->post('/auth/user/change-password', [AuthController::class, 'changePassword']);
+
 Route::middleware('auth:sanctum')->get('/kelas/getkelasuser', [KelasController::class, 'getKelasByUserId']);
 Route::middleware('auth:sanctum')->post('/kelas/create', [KelasController::class, 'create']);
 Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/addMataPelajaran', [KelasController::class, 'addMataPelajaran']);

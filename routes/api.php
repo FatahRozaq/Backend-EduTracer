@@ -34,32 +34,9 @@ Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/addMataPelajaran', [K
 Route::middleware('auth:sanctum')->get('/user/kelas', [KelasController::class, 'getKelasWithMataPelajaran']);
 
 
-
-
-// Route::middleware('auth:sanctum')->get('/auth/user', [AuthController::class, 'getUser']);
-
-
-Route::post('/kelas/tambah', [KelasController::class, 'store']);
-// Route::post('/getKelasByUserId', [KelasController::class, 'getKelasByUserId']);
-
-Route::get('/test', function () {
-    return response()->json(['message' => 'Server is running']);
-});
-
-Route::middleware('auth:sanctum')->get('/kelas/getkelasuser', [KelasController::class, 'getKelasByUserId']);
-Route::middleware('auth:sanctum')->post('/kelas/create', [KelasController::class, 'create']);
-Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/addMataPelajaran', [KelasController::class, 'addMataPelajaran']);
-Route::middleware('auth:sanctum')->get('/user/kelas', [KelasController::class, 'getKelasWithMataPelajaran']);
-
-
-
-
-// Route::middleware('auth:sanctum')->get('/auth/user', [AuthController::class, 'getUser']);
-
-
-Route::put('/orangtua/suratizin/{id}', [SuratIzinController::class, 'update']);
-Route::get('/orangtua/suratizin', [SuratIzinController::class, 'index']);
-Route::get('/orangtua/suratizin/{id}', [SuratIzinController::class, 'show']);
-Route::get('/guru/suratizin/{id}', [SuratIzinController::class, 'show']);
-Route::post('/orangtua/suratizin', [SuratIzinController::class, 'store']);
-Route::delete('/orangtua/suratizin/{id}', [SuratIzinController::class, 'destroy']);
+Route::middleware('auth:sanctum')->put('/orangtua/suratizin/{id}', [SuratIzinController::class, 'update']);
+Route::middleware('auth:sanctum')->get('/orangtua/suratizin', [SuratIzinController::class, 'index']);
+Route::middleware('auth:sanctum')->get('/orangtua/suratizin/{id}', [SuratIzinController::class, 'show']);
+Route::middleware('auth:sanctum')->get('/guru/suratizin/{id}', [SuratIzinController::class, 'show']);
+Route::middleware('auth:sanctum')->post('/orangtua/suratizin', [SuratIzinController::class, 'store']);
+Route::middleware('auth:sanctum')->delete('/orangtua/suratizin/{id}', [SuratIzinController::class, 'destroy']);

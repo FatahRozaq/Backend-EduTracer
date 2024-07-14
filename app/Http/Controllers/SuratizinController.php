@@ -53,7 +53,7 @@ class SuratIzinController extends Controller
             return response()->json(['message' => 'Surat Izin berhasil dikirim'], 201);
         } catch (\Exception $e) {
             Log::error('Error storing surat izin:', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Gagal mengirim Surat Izin'], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 

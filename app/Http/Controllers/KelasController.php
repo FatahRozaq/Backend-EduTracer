@@ -12,44 +12,28 @@ class KelasController extends Controller
 {
     
     public function store(Request $request)
-    {
-       
-        $request->validate([
-            'nama_kelas' => 'required|string',
-            'deskripsi' => 'nullable|string',
-            'enrollment_key' => 'nullable|string',
-        ]);
+{
+    $request->validate([
+        'nama_kelas' => 'required|string',
+        'deskripsi' => 'nullable|string',
+        'enrollment_key' => 'nullable|string',
+        'id_user' => 'required|integer|exists:users,id',
+    ]);
 
-        $kelas = new Kelas();
-        $kelas->nama_kelas = $request->nama_kelas;
-        $kelas->deskripsi = $request->deskripsi;
-        $kelas->enrollment_key = $request->enrollment_key;
+    $kelas = new Kelas();
+    $kelas->nama_kelas = $request->nama_kelas;
+    $kelas->deskripsi = $request->deskripsi;
+    $kelas->enrollment_key = $request->enrollment_key;
+    $kelas->save();
+    
+    $kelasUser = new KelasUser();
+    $kelasUser->id_kelas = $kelas->id_kelas;
+    $kelasUser->id_user = $request->id_user;
+    $kelasUser->save();
 
-        
-        $kelas->save();
-        
-        $kelasUser = new KelasUser();
-        $kelasUser->id_kelas = $kelas->id_kelas;
-        $kelasUser->id_user = Auth::id(); 
+    return response()->json($kelas, 201);
+}
 
-        
-        $kelasUser->save();
-
-        // if (Auth::check()) {
-            
-        //     $kelasUser = new KelasUser();
-        //     $kelasUser->id_kelas = $kelas->id_kelas;
-        //     $kelasUser->id_user = Auth::id(); 
-
-            
-        //     $kelasUser->save();
-        // } else {
-            
-        //     return response()->json(['message' => 'Unauthorized'], 401);
-        // }
-
-        return response()->json($kelas, 201);
-    }
 
     public function index()
     {
@@ -69,42 +53,34 @@ class KelasController extends Controller
     
     public function getKelasByUserId(Request $request)
     {
-        // Mendapatkan user yang sedang login
         $user = Auth::user();
 
-        // Mendapatkan kelas yang terkait dengan user
         $kelas = $user->kelas;
 
-        // Mengembalikan response dalam bentuk JSON
         return response()->json($kelas, 200);
     }
 
     public function create(Request $request)
     {
-        // Validasi input
         $request->validate([
             'nama_kelas' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'enrollment_key' => 'nullable|string|max:255',
+            'enrollment_key' => 'nullable|string|max:255|unique:kelas,enrollment_key',
         ]);
 
-        // Buat kelas baru
         $kelas = Kelas::create([
             'nama_kelas' => $request->nama_kelas,
             'deskripsi' => $request->deskripsi,
             'enrollment_key' => $request->enrollment_key,
         ]);
 
-        // Dapatkan user yang sedang login
         $user = Auth::user();
 
-        // Tambahkan relasi ke kelas_user
         KelasUser::create([
             'id_user' => $user->id,
             'id_kelas' => $kelas->id_kelas,
         ]);
 
-        // Kembalikan response
         return response()->json([
             'message' => 'Kelas berhasil dibuat',
             'kelas' => $kelas,
@@ -113,15 +89,12 @@ class KelasController extends Controller
 
     public function addMataPelajaran(Request $request, $id_kelas)
     {
-        // Validasi input
         $request->validate([
             'id_mata_pelajaran' => 'required|exists:mata_pelajarans,id_mata_pelajaran',
         ]);
 
-        // Cek apakah kelas ada
         $kelas = Kelas::findOrFail($id_kelas);
 
-        // Tambahkan relasi ke kelas_mata_pelajaran
         KelasMataPelajaran::create([
             'id_kelas' => $id_kelas,
             'id_mata_pelajaran' => $request->id_mata_pelajaran,
@@ -148,6 +121,62 @@ class KelasController extends Controller
     //         'kelas' => $kelas,
     //     ], 200);
     // }
+
+    // public function getMataPelajaran($id_kelas)
+    // {
+    //     // Dapatkan user yang sedang login
+    //     $user = Auth::user();
+
+    //     // Cek apakah user berhubungan dengan kelas ini
+    //     $kelas = $user->kelas()->where('id_kelas', $id_kelas)->first();
+
+    //     if (!$kelas) {
+    //         return response()->json(['message' => 'User tidak berhubungan dengan kelas ini'], 403);
+    //     }
+
+    //     // Dapatkan mata pelajaran yang terkait dengan kelas
+    //     $mataPelajaran = $kelas->mataPelajaran;
+
+    //     return response()->json($mataPelajaran);
+    // }
+    
+    // public function showMataPelajaran()
+    // {
+    //     $user = Auth::user();
+    //     $mataPelajaran = $user->mataPelajaran();
+
+    //     if ($mataPelajaran->isEmpty()) {
+    //         return response()->json(['message' => 'No subjects found for your class.'], 404);
+    //     }
+
+    //     return response()->json($mataPelajaran);
+    // }
+
+    public function enroll(Request $request)
+    {
+        $request->validate([
+            'enrollment_key' => 'required|string|exists:kelas,enrollment_key',
+        ]);
+
+        $user = Auth::user();
+
+        $kelas = Kelas::where('enrollment_key', $request->enrollment_key)->first();
+
+        if ($kelas->user()->where('id_user', $user->id)->exists()) {
+            return response()->json([
+                'message' => 'Anda sudah terdaftar di kelas ini.',
+            ], 400);
+        }
+        KelasUser::create([
+            'id_user' => $user->id,
+            'id_kelas' => $kelas->id_kelas,
+        ]);
+
+        return response()->json([
+            'message' => 'Anda berhasil mendaftar ke kelas.',
+            'kelas' => $kelas,
+        ], 201);
+    }
 
 
 }

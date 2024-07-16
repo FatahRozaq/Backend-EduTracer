@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('id_kelas');
             $table->string('nama_kelas');
             $table->string('deskripsi')->nullable();
-            $table->string('enrollment_key');
+            $table->string('enrollment_key')->unique();
             $table->timestamps();
         });
     }

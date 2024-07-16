@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Models\SuratIzin;
 
@@ -15,20 +16,48 @@ class SuratIzinController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'id_user' => 'required|exists:users,id',
-            'id_penerima' => 'required|exists:users,id',
-            'id_kelas' => 'required|exists:kelas,id_kelas',
-            'tanggal' => 'required|date',
-            'jenis_surat' => 'required|string|max:5',
-            'deskripsi' => 'required|string|max:255',
-            'berkas_surat' => 'nullable|string|max:255',
-        ]);
+        try {
+            Log::info('Data received:', $request->all());
 
-        $suratIzin = SuratIzin::create($validated);
+            $request->validate([
+                'id_user' => 'required|integer',
+                'id_penerima' => 'required|integer',
+                'id_kelas' => 'required|integer',
+                'tanggal' => 'required|date',
+                'jenis_surat' => 'required|string',
+                'deskripsi' => 'required|string',
+                'berkas_surat' => 'nullable|file|mimes:jpg,png,jpeg,pdf|max:2048',
+            ]);
 
-        return response()->json($suratIzin, 201);
+            Log::info('Validation passed.');
+
+            $suratIzin = new SuratIzin();
+            $suratIzin->id_user = $request->id_user;
+            $suratIzin->id_penerima = $request->id_penerima;
+            $suratIzin->id_kelas = $request->id_kelas;
+            $suratIzin->tanggal = $request->tanggal;
+            $suratIzin->jenis_surat = $request->jenis_surat;
+            $suratIzin->deskripsi = $request->deskripsi;
+
+            if ($request->hasFile('berkas_surat')) {
+                Log::info('File is present.');
+                $file = $request->file('berkas_surat');
+                $path = $file->store('surat_izin', 'public');
+                Log::info('File stored at: ' . $path);
+                $suratIzin->berkas_surat = $path;
+            }
+
+            $suratIzin->save();
+            Log::info('Surat Izin saved.');
+
+            return response()->json(['message' => 'Surat Izin berhasil dikirim'], 201);
+        } catch (\Exception $e) {
+            Log::error('Error storing surat izin:', ['error' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
+
+
 
     public function show($id)
     {

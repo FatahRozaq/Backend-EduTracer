@@ -33,11 +33,23 @@ Route::middleware('auth:sanctum')->get('/parent-child/parents', [ParentChildCont
 Route::get('/test', function () {
     return response()->json(['message' => 'Server is running']);
 });
+
+Route::middleware('auth:sanctum')->put('/auth/user', [AuthController::class, 'updateUser']);
+Route::middleware('auth:sanctum')->post('/auth/user/change-password', [AuthController::class, 'changePassword']);
+
 Route::post('/kelas/tambah', [KelasController::class, 'store']);
 Route::middleware('auth:sanctum')->get('/kelas/getkelasuser', [KelasController::class, 'getKelasByUserId']);
 Route::middleware('auth:sanctum')->post('/kelas/create', [KelasController::class, 'create']);
 Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/addMataPelajaran', [KelasController::class, 'addMataPelajaran']);
 Route::middleware('auth:sanctum')->get('/user/kelas', [KelasController::class, 'getKelasWithMataPelajaran']);
+
+
+Route::middleware('auth:sanctum')->put('/orangtua/suratizin/{id}', [SuratIzinController::class, 'update']);
+Route::middleware('auth:sanctum')->get('/orangtua/suratizin', [SuratIzinController::class, 'index']);
+Route::middleware('auth:sanctum')->get('/orangtua/suratizin/{id}', [SuratIzinController::class, 'show']);
+Route::middleware('auth:sanctum')->get('/guru/suratizin/{id}', [SuratIzinController::class, 'show']);
+Route::middleware('auth:sanctum')->post('/orangtua/suratizin', [SuratIzinController::class, 'store']);
+Route::middleware('auth:sanctum')->delete('/orangtua/suratizin/{id}', [SuratIzinController::class, 'destroy']);
 Route::middleware('auth:sanctum')->get('/kelas/{id_kelas}/mataPelajaran', [KelasController::class, 'getMataPelajaran']);
 Route::middleware('auth:sanctum')->post('/kelas/enroll', [KelasController::class, 'enroll']);
 

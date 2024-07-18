@@ -106,51 +106,7 @@ class KelasController extends Controller
             'kelas' => $kelas,
         ], 201);
     }
-
-    // public function getKelasWithMataPelajaran(Request $request)
-    // {
-    //     // Dapatkan user yang sedang login
-    //     $user = Auth::user();
-        
-    //     // Ambil kelas yang terkait dengan user
-    //     $kelas = $user->kelas()->with('mataPelajaran')->get();
-
-    //     // Kembalikan response dengan data kelas dan mata pelajaran
-    //     return response()->json([
-    //         'message' => 'Data kelas dan mata pelajaran berhasil diambil',
-    //         'kelas' => $kelas,
-    //     ], 200);
-    // }
-
-    // public function getMataPelajaran($id_kelas)
-    // {
-    //     // Dapatkan user yang sedang login
-    //     $user = Auth::user();
-
-    //     // Cek apakah user berhubungan dengan kelas ini
-    //     $kelas = $user->kelas()->where('id_kelas', $id_kelas)->first();
-
-    //     if (!$kelas) {
-    //         return response()->json(['message' => 'User tidak berhubungan dengan kelas ini'], 403);
-    //     }
-
-    //     // Dapatkan mata pelajaran yang terkait dengan kelas
-    //     $mataPelajaran = $kelas->mataPelajaran;
-
-    //     return response()->json($mataPelajaran);
-    // }
     
-    // public function showMataPelajaran()
-    // {
-    //     $user = Auth::user();
-    //     $mataPelajaran = $user->mataPelajaran();
-
-    //     if ($mataPelajaran->isEmpty()) {
-    //         return response()->json(['message' => 'No subjects found for your class.'], 404);
-    //     }
-
-    //     return response()->json($mataPelajaran);
-    // }
 
     public function enroll(Request $request)
     {
@@ -177,6 +133,15 @@ class KelasController extends Controller
             'kelas' => $kelas,
         ], 201);
     }
+
+    public function getMataPelajaran($id_kelas)
+    {
+        $kelas = Kelas::findOrFail($id_kelas);
+        $mataPelajaran = $kelas->mataPelajaran;
+
+        return response()->json($mataPelajaran);
+    }
+
 
 
 }

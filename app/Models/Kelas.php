@@ -20,7 +20,7 @@ class Kelas extends Model
     public function mataPelajaran()
     {
         return $this->belongsToMany(MataPelajaran::class, 'kelas_mata_pelajaran', 'id_kelas', 'id_mata_pelajaran')
-            ->using(KelasMataPelajaran::class)
+            // ->using(KelasMataPelajaran::class)
             ->withTimestamps()
             ->withPivot('id_kelas_mata_pelajaran');
     }

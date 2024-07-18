@@ -71,17 +71,6 @@ class User extends Authenticatable
         return $this->belongsToMany(Kelas::class, 'kelas_user', 'id_user', 'id_kelas');
     }
 
-    public function mataPelajaran()
-    {
-        $kelas = $this->kelas()->first();
-
-        if ($kelas) {
-            return $kelas->mataPelajaran()->get();
-        }
-
-        return collect();
-    }
-
     public function parents()
     {
         return $this->belongsToMany(User::class, 'parent_child', 'child_id', 'parent_id')->withPivot('status');

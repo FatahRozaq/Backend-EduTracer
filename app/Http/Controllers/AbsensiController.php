@@ -7,6 +7,8 @@ use App\Models\Jadwal;
 use App\Models\Absensi;
 use App\Models\KelasUser;
 use App\Models\Kelas;
+use App\Models\KelasMataPelajaran;
+use App\Models\MataPelajaran;
 use Illuminate\Http\Request;
 
 class AbsensiController extends Controller
@@ -329,6 +331,21 @@ class AbsensiController extends Controller
             ], 500);
         }
     }
+
+    // public function getFilterAbsensi(Request $request)
+    // {
+    //     $userId = $request['id_user'];
+    //     $kelasId = $request['id_kelas'];
+
+    //     // $mapel = MataPelajaran::where('id_user', $userId)->get();
+
+    //     // $absensi = KelasUser::where();
+
+    //     $guru = MataPelajaran::where('id_user')
+    //     $jadwal = Jadwal::where()
+
+    // }
+    
 
 
 

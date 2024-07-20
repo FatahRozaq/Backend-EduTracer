@@ -5,16 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MapelGuru extends Model
+class PengajarMapel extends Model
 {
     use HasFactory;
 
-    protected $table = 'mapel_guru';
-    protected $primaryKey = 'id_mapel_guru';
+    protected $table = 'pengajar_mapel';
+    protected $primaryKey = 'id_pengajar_mapel';
 
     protected $fillable = [
         'id_mata_pelajaran',
-        'id_user'
+        'id_user',
+        'id_kelas',
     ];
 
     public function mataPelajaran()
@@ -24,6 +25,11 @@ class MapelGuru extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'id');
+        return $this->belongsTo(User::class, 'id_user');
+    }
+
+    public function kelas()
+    {
+        return $this->belongsTo(Kelas::class, 'id_kelas');
     }
 }

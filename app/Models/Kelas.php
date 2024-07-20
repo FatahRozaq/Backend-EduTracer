@@ -14,9 +14,24 @@ class Kelas extends Model
     protected $primaryKey = 'id_kelas';
 
     protected $fillable = [
-        'nama_kelas', 'deskripsi', 'enrollment_key'
+        'nama_kelas',
+        'deskripsi',
+        'enrollment_key'
     ];
 
+    public function mataPelajaran()
+    {
+        return $this->belongsToMany(MataPelajaran::class, 'kelas_mata_pelajaran', 'id_kelas', 'id_mata_pelajaran')
+            // ->using(KelasMataPelajaran::class)
+            ->withTimestamps()
+            ->withPivot('id_kelas_mata_pelajaran');
+    }
+
+    public function user()
+    {
+        return $this->belongsToMany(User::class, 'kelas_user', 'id_kelas', 'id_user');
+    }
+   
     public function kelasUsers()
     {
         return $this->hasMany(KelasUser::class, 'id_kelas');

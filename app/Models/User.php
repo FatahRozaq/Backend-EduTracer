@@ -65,5 +65,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(User::class, 'partner_id');
     }
-    
+
+    public function kelas()
+    {
+        return $this->belongsToMany(Kelas::class, 'kelas_user', 'id_user', 'id_kelas');
+    }
+
+    public function parents()
+    {
+        return $this->belongsToMany(User::class, 'parent_child', 'child_id', 'parent_id')->withPivot('status');
+    }
+
+    public function childrenMany()
+    {
+        return $this->belongsToMany(User::class, 'parent_child', 'parent_id', 'child_id')->withPivot('status');
+    }
 }

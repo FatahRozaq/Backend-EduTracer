@@ -13,7 +13,8 @@ class KelasUser extends Model
     protected $primaryKey = 'id_kelas_user';
 
     protected $fillable = [
-        'id_user', 'id_kelas'
+        'id_user',
+        'id_kelas',
     ];
 
     public function user()

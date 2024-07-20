@@ -27,4 +27,3 @@ class KelasUser extends Model
         return $this->belongsTo(Kelas::class, 'id_kelas');
     }
 }
-

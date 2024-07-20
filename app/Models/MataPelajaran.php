@@ -25,4 +25,9 @@ class MataPelajaran extends Model
             ->withTimestamps()
             ->withPivot('id_kelas_mata_pelajaran');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id');
+    }
 }

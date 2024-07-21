@@ -44,6 +44,7 @@ Route::middleware([SetTimezone::class])->group(function () {
     Route::get('/absensi/status/siswa', [AbsensiController::class, 'getAttendanceStudentStatus']);
     Route::get('/absensi/status/mapel', [AbsensiController::class, 'getAttendanceStatus']);
     Route::get('/kelas/get', [AbsensiController::class, 'getKelas']);
+    Route::get('/absensi/guru/filter', [AbsensiController::class, 'getFilterAbsensi']);
 });
 
 // Route::get('/classes/{classId}/attendance', [AbsensiController::class, 'getClassAttendance']);

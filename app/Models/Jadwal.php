@@ -16,10 +16,6 @@ class Jadwal extends Model
         'id_kelas', 'id_mata_pelajaran', 'tanggal', 'hari', 'jam_mulai', 'jam_akhir'
     ];
 
-    protected $casts = [
-        'hari' => 'array', // Jika menyimpan sebagai array JSON
-    ];
-
     public function kelas()
     {
         return $this->belongsTo(Kelas::class, 'id_kelas');
@@ -29,4 +25,15 @@ class Jadwal extends Model
     {
         return $this->belongsTo(MataPelajaran::class, 'id_mata_pelajaran');
     }
+
+    public function getHariAttribute($value)
+    {
+        return explode(',', $value);
+    }
+
+    public function setHariAttribute($value)
+    {
+        $this->attributes['hari'] = implode(',', $value);
+    }
+
 }

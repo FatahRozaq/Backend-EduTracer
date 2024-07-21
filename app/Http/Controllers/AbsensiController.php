@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Jadwal;
 use App\Models\Absensi;
+use App\Models\JadwalPengajar;
 use App\Models\KelasUser;
 use App\Models\Kelas;
 use App\Models\KelasMataPelajaran;
@@ -298,7 +299,6 @@ class AbsensiController extends Controller
                 $userId = $attendanceData['userId'];
                 $statusKehadiran = $attendanceData['status_kehadiran'];
 
-                // Cari entri absensi yang ada
                 $attendance = Absensi::where('id_kelas_mata_pelajaran', $idSubjectClass)
                     ->where('id_jadwal', $scheduleId)
                     ->where('id_user', $userId)
@@ -306,11 +306,9 @@ class AbsensiController extends Controller
                     ->first();
 
                 if ($attendance) {
-                    // Update entri absensi yang ada
                     $attendance->status_kehadiran = $statusKehadiran;
                     $attendance->save();
                 } else {
-                    // Buat entri absensi baru jika tidak ada
                     $attendance = Absensi::create([
                         'id_kelas_mata_pelajaran' => $idSubjectClass,
                         'id_jadwal' => $scheduleId,
@@ -332,19 +330,27 @@ class AbsensiController extends Controller
         }
     }
 
-    // public function getFilterAbsensi(Request $request)
-    // {
-    //     $userId = $request['id_user'];
-    //     $kelasId = $request['id_kelas'];
+    public function getFilterAbsensi(Request $request)
+    {
+        $userId = $request['id_user'];
 
-    //     // $mapel = MataPelajaran::where('id_user', $userId)->get();
+        $now = request('current_time');
+        $dayName = $now->dayName;
 
-    //     // $absensi = KelasUser::where();
+        $pengajars = JadwalPengajar::where('id_user', $userId)->get();
 
-    //     $guru = MataPelajaran::where('id_user')
-    //     $jadwal = Jadwal::where()
+        $jadwals = collect();
+        foreach ($pengajars as $pengajar) {
+            $pengajarJadwals = Jadwal::where('id_jadwal', $pengajar->id_jadwal)
+                                    ->get()
+                                    ->filter(function($jadwal) use ($dayName) {
+                                        return in_array($dayName, $jadwal->hari);
+                                    });
+            $jadwals = $jadwals->merge($pengajarJadwals);
+        }
 
-    // }
+        return response()->json($jadwals);
+    }
     
 
 

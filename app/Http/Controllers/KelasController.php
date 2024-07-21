@@ -12,27 +12,36 @@ class KelasController extends Controller
 {
     
     public function store(Request $request)
-{
-    $request->validate([
-        'nama_kelas' => 'required|string',
-        'deskripsi' => 'nullable|string',
-        'enrollment_key' => 'nullable|string',
-        'id_user' => 'required|integer|exists:users,id',
-    ]);
+    {
+        $validatedData = $request->validate([
+            'nama_kelas' => 'required|string',
+            'deskripsi' => 'nullable|string',
+            'enrollment_key' => 'nullable|string|unique:kelas,enrollment_key',
+            'id_user' => 'required|integer|exists:users,id',
+        ]);
 
-    $kelas = new Kelas();
-    $kelas->nama_kelas = $request->nama_kelas;
-    $kelas->deskripsi = $request->deskripsi;
-    $kelas->enrollment_key = $request->enrollment_key;
-    $kelas->save();
-    
-    $kelasUser = new KelasUser();
-    $kelasUser->id_kelas = $kelas->id_kelas;
-    $kelasUser->id_user = $request->id_user;
-    $kelasUser->save();
+        try {
+            $kelas = new Kelas();
+            $kelas->nama_kelas = $request->nama_kelas;
+            $kelas->deskripsi = $request->deskripsi;
+            $kelas->enrollment_key = $request->enrollment_key;
+            $kelas->save();
+            
+            $kelasUser = new KelasUser();
+            $kelasUser->id_kelas = $kelas->id_kelas;
+            $kelasUser->id_user = $request->id_user;
+            $kelasUser->save();
 
-    return response()->json($kelas, 201);
-}
+            return response()->json($kelas, 201);
+        } catch (\Illuminate\Database\QueryException $ex) {
+            if ($ex->errorInfo[1] == 1062) { // Duplicate entry error code
+                return response()->json(['message' => 'Enrollment key already exists'], 400);
+            }
+            return response()->json(['message' => 'Error creating class'], 500);
+        }
+    }
+
+
 
 
     public function index()
@@ -141,6 +150,95 @@ class KelasController extends Controller
 
         return response()->json($mataPelajaran);
     }
+
+    public function destroy($id_kelas)
+    {
+        // Temukan kelas berdasarkan ID
+        $kelas = Kelas::findOrFail($id_kelas);
+
+        // Hapus semua relasi mata pelajaran terkait dengan kelas ini
+        KelasMataPelajaran::where('id_kelas', $id_kelas)->delete();
+
+        // Hapus kelas
+        $kelas->delete();
+
+        return response()->json([
+            'message' => 'Kelas dan relasi mata pelajaran berhasil dihapus.',
+        ], 200);
+    }
+
+    public function update(Request $request, $id_kelas)
+    {
+        // Validasi data yang dikirimkan oleh permintaan
+        $request->validate([
+            'nama_kelas' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'enrollment_key' => 'nullable|string|max:255|unique:kelas,enrollment_key,' . $id_kelas . ',id_kelas', 
+        ]);
+
+        // Temukan kelas berdasarkan ID
+        $kelas = Kelas::findOrFail($id_kelas);
+
+        // Perbarui data kelas dengan data dari permintaan
+        $kelas->nama_kelas = $request->input('nama_kelas');
+        $kelas->deskripsi = $request->input('deskripsi');
+        $kelas->enrollment_key = $request->input('enrollment_key');
+
+        // Simpan perubahan ke database
+        $kelas->save();
+
+        return response()->json([
+            'message' => 'Kelas berhasil diperbarui',
+            'kelas' => $kelas,
+        ], 200);
+    }
+
+    public function destroyKelasUser($id_kelas)
+    {
+        // Dapatkan user yang sedang login
+        $user = Auth::user();
+
+        // Temukan relasi kelas_user berdasarkan id_kelas dan id_user yang sedang login
+        $kelasUser = KelasUser::where('id_kelas', $id_kelas)
+                            ->where('id_user', $user->id)
+                            ->first();
+
+        if ($kelasUser) {
+            // Hapus relasi kelas_user
+            $kelasUser->delete();
+
+            return response()->json([
+                'message' => 'KelasUser berhasil dihapus.',
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'KelasUser tidak ditemukan.',
+            ], 404);
+        }
+    }
+
+
+    public function searchKelas(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'search_term' => 'required|string|max:255',
+        ]);
+
+        // Ambil istilah pencarian dari permintaan
+        $searchTerm = $request->input('search_term');
+
+        // Cari kelas berdasarkan nama atau deskripsi yang sesuai dengan istilah pencarian
+        $kelas = Kelas::where('nama_kelas', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('deskripsi', 'LIKE', "%{$searchTerm}%")
+                        ->get();
+
+        return response()->json([
+            'message' => 'Pencarian berhasil.',
+            'kelas' => $kelas,
+        ], 200);
+    }
+
 
 
 

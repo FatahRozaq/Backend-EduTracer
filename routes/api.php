@@ -11,7 +11,8 @@ use App\Http\Controllers\AbsensiController;
 
 use App\Http\Controllers\ParentChildController;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\MataPelajaranController;
+use App\Http\Controllers\TugasKelasMataPelajaranController;
 use Illuminate\Support\Facades\Auth;
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -59,33 +60,49 @@ Route::middleware('auth:sanctum')->post('/orangtua/suratizin', [SuratIzinControl
 Route::middleware('auth:sanctum')->delete('/orangtua/suratizin/{id}', [SuratIzinController::class, 'destroy']);
 
 
-//Kelas
-Route::middleware('auth:sanctum')->post('/kelas/enroll', [KelasController::class, 'enroll']);
+//Kelas dan mata pelajaran
+Route::middleware('auth:sanctum')->post('/kelas/enroll', [KelasController::class, 'enroll']); //enroll kelas
 Route::post('/kelas/tambah', [KelasController::class, 'store']);
-Route::middleware('auth:sanctum')->get('/kelas/getkelasuser', [KelasController::class, 'getKelasByUserId']);
+Route::middleware('auth:sanctum')->delete('/kelas/{id_kelas}', [KelasController::class, 'destroy']);//menghapus kelas dan kelas mata pelajaran
+Route::middleware('auth:sanctum')->put('/kelas/{id_kelas}', [KelasController::class, 'update']);// update kelas
+
+Route::middleware('auth:sanctum')->get('/kelas/getkelasuser', [KelasController::class, 'getKelasByUserId']); //mengambil kelas sesuai id user
 Route::middleware('auth:sanctum')->post('/kelas/create', [KelasController::class, 'create']);
-Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/addMataPelajaran', [KelasController::class, 'addMataPelajaran']);
-Route::middleware('auth:sanctum')->get('kelas/{id_kelas}/mata-pelajaran', [KelasController::class, 'getMataPelajaran']);
+Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/addMataPelajaran', [KelasController::class, 'addMataPelajaran']);// add mata pelajaran ke kelas
+Route::middleware('auth:sanctum')->get('/kelas/{id_kelas}/mata-pelajaran', [KelasController::class, 'getMataPelajaran']); //menampilkan mata pelajaran dalam suatu kelas
+Route::middleware('auth:sanctum')->delete('/kelas-user/{id_kelas}', [KelasController::class, 'destroyKelasUser']);// menghapus kelas user
+Route::middleware('auth:sanctum')->post('/kelas/search', [KelasController::class, 'searchKelas']);
+
+// Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/mata-pelajaran', [KelasController::class, 'storeMataPelajaran']);
+Route::middleware('auth:sanctum')->post('/mapel/{id_kelas}/create', [MataPelajaranController::class, 'storeMataPelajaran']); // membuat mata pelajaran dan langsung menghubungkan ke kelas
+Route::middleware('auth:sanctum')->delete('/kelas/{id_kelas}/mata-pelajaran/{id_mata_pelajaran}', [MataPelajaranController::class, 'destroyKelasMataPelajaran']);// menghapus kelas mata pelajaran
+Route::middleware('auth:sanctum')->get('/mata-pelajaran/search', [MataPelajaranController::class, 'searchMataPelajaran']); //mencari kelas
+Route::middleware('auth:sanctum')->put('/mata-pelajaran/update/{id_mata_pelajaran}', [MataPelajaranController::class, 'updateMataPelajaran']);
+Route::middleware('auth:sanctum')->delete('/mata-pelajaran/destroy/{id_mata_pelajaran}', [MataPelajaranController::class, 'destroyMataPelajaran']);
+
+
+
+Route::middleware('auth:sanctum')->get('/tugas-kelas-mata-pelajaran', [TugasKelasMataPelajaranController::class, 'getTugasByUser']);
+Route::middleware('auth:sanctum')->post('/tugas-kelas-mata-pelajaran/search', [TugasKelasMataPelajaranController::class, 'searchTugas']);
+Route::middleware('auth:sanctum')->put('/tugas-kelas-mata-pelajaran/update/{id}', [TugasKelasMataPelajaranController::class, 'updateTugasKelasMataPelajaran']);
+
+
+
 
 
 // parent child
-Route::middleware('auth:sanctum')->get('/user/search-students', [UserController::class, 'searchStudentsByName']);
-Route::middleware('auth:sanctum')->get('/users/siswa', [UserController::class, 'getAllSiswa']);
+Route::middleware('auth:sanctum')->get('/user/search-students', [UserController::class, 'searchStudentsByName']);// mencari user siswa dengan key word nama
+Route::middleware('auth:sanctum')->get('/users/siswa', [UserController::class, 'getAllSiswa']);// mengambil user siswa yang belum ada si parent_child
 
-Route::middleware('auth:sanctum')->post('/confirm-request', [ParentChildController::class, 'confirmRequest']);
-Route::middleware('auth:sanctum')->post('/send-request', [ParentChildController::class, 'sendRequest']);
-Route::middleware('auth:sanctum')->get('/pending-requests', [ParentChildController::class, 'getPendingRequestsForChild']);
+Route::middleware('auth:sanctum')->post('/confirm-request', [ParentChildController::class, 'confirmRequest']); //confirm request oleh siswa
+Route::middleware('auth:sanctum')->post('/send-request', [ParentChildController::class, 'sendRequest']); //send request ke siswa
+Route::middleware('auth:sanctum')->get('/pending-requests', [ParentChildController::class, 'getPendingRequestsForChild']);// mendapatkan request yang pending di siswa
 
-Route::middleware('auth:sanctum')->post('/parent-child/send', [ParentChildController::class, 'sendRequest']);
-Route::middleware('auth:sanctum')->post('/parent-child/confirm/{parent_id}', [ParentChildController::class, 'confirmRequest']);
-Route::middleware('auth:sanctum')->get('/parent-child/children', [ParentChildController::class, 'getChildren']);
-Route::middleware('auth:sanctum')->get('/parent-child/parents', [ParentChildController::class, 'getParents']);
+Route::middleware('auth:sanctum')->get('/parent-child/children', [ParentChildController::class, 'getChildren']);// mendapatkan data anak yang sudah konfirm
+Route::middleware('auth:sanctum')->get('/parent-child/parents', [ParentChildController::class, 'getParents']);// mendapatkan data ortu yang sudah konfirm
+Route::middleware('auth:sanctum')->get('/parent-child/kelas-anak', [ParentChildController::class, 'getKelasAnak']);
 
 
 // Route::get('/search-student', [UserController::class, 'searchStudent']);
 Route::get('/view-child/{parent_id}', [ParentChildController::class, 'viewChild']);
 
-
-Route::middleware('auth:sanctum')->get('/check-auth', function (Request $request) {
-    return response()->json(['message' => 'User is authenticated', 'user' => Auth::user()]);
-});

@@ -8,34 +8,6 @@ use App\Models\ParentChild;
 
 class ParentChildController extends Controller
 {
-    // public function sendRequest(Request $request)
-    // {
-    //     $request->validate([
-    //         'child_id' => 'required|exists:users,id',
-    //     ]);
-
-    //     $parent = Auth::user();
-    //     $child = User::findOrFail($request->child_id);
-
-    //     $parent->childrenMany()->attach($child, ['status' => 'send']);
-
-    //     return response()->json(['message' => 'Request sent successfully']);
-    // }
-
-    // public function confirmRequest($parent_id)
-    // {
-    //     $child = Auth::user();
-    //     $parent = User::findOrFail($parent_id);
-
-    //     $relationship = $child->parents()->where('parent_id', $parent_id)->first();
-
-    //     if ($relationship && $relationship->pivot->status == 'send') {
-    //         $child->parents()->updateExistingPivot($parent_id, ['status' => 'confirm']);
-    //         return response()->json(['message' => 'Request confirmed successfully']);
-    //     }
-
-    //     return response()->json(['message' => 'No request found or already confirmed'], 404);
-    // }
 
     public function getChildren()
     {
@@ -117,5 +89,26 @@ class ParentChildController extends Controller
                                        ->get();
 
         return response()->json($pendingRequests);
+    }
+
+    public function getKelasAnak()
+    {
+        $parent = Auth::user();
+
+        if (!$parent) {
+            return response()->json(['message' => 'Unauthorized.'], 401);
+        }
+
+        // Mendapatkan anak-anak dari user parent yang login
+        $children = $parent->childrenMany()->wherePivot('status', 'confirm')->get();
+
+        // Mengumpulkan kelas dari setiap anak
+        $kelasAnak = collect();
+        foreach ($children as $child) {
+            $kelas = $child->kelas()->get();
+            $kelasAnak = $kelasAnak->merge($kelas);
+        }
+
+        return response()->json($kelasAnak->unique('id_kelas'));
     }
 }

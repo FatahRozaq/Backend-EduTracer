@@ -59,6 +59,8 @@ Route::middleware('auth:sanctum')->get('/orangtua/suratizin/{id}', [SuratIzinCon
 Route::middleware('auth:sanctum')->get('/guru/suratizin/{id}', [SuratIzinController::class, 'show']);
 Route::middleware('auth:sanctum')->post('/orangtua/suratizin', [SuratIzinController::class, 'store']);
 Route::middleware('auth:sanctum')->delete('/orangtua/suratizin/{id}', [SuratIzinController::class, 'destroy']);
+Route::middleware('auth:sanctum')->get('/guru/suratizin', [SuratIzinController::class, 'index']);
+
 
 
 //Kelas dan mata pelajaran
@@ -73,6 +75,7 @@ Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/addMataPelajaran', [K
 Route::middleware('auth:sanctum')->get('/kelas/{id_kelas}/mata-pelajaran', [KelasController::class, 'getMataPelajaran']); //menampilkan mata pelajaran dalam suatu kelas
 Route::middleware('auth:sanctum')->delete('/kelas-user/{id_kelas}', [KelasController::class, 'destroyKelasUser']);// menghapus kelas user
 Route::middleware('auth:sanctum')->post('/kelas/search', [KelasController::class, 'searchKelas']);
+Route::middleware('auth:sanctum')->get('/kelas/{id_kelas}/guru', [KelasController::class, 'getGuruInClass']);
 
 // Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/mata-pelajaran', [KelasController::class, 'storeMataPelajaran']);
 Route::middleware('auth:sanctum')->post('/mapel/{id_kelas}/create', [MataPelajaranController::class, 'storeMataPelajaran']); // membuat mata pelajaran dan langsung menghubungkan ke kelas

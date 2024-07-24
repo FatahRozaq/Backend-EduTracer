@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('id_kelas_user');
             $table->unsignedBiginteger('id_user');
             $table->unsignedBiginteger('id_kelas');
+            $table->string('status');
             $table->timestamps();
 
             $table->foreign('id_user')->references('id')

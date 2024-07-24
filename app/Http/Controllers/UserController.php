@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\ParentChild;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Kelas;
+use App\Models\KelasUser;
 
 class UserController extends Controller
 {
@@ -51,6 +53,26 @@ class UserController extends Controller
         $siswa = User::where('roles', 'Siswa')
             ->whereNotIn('id', $relatedChildrenIds)
             ->get();
+
+        return response()->json($siswa);
+    }
+
+    public function getAllGuru()
+    {
+        $guru = User::where('roles', 'Guru')->get();
+
+        return response()->json($guru);
+    }
+
+    public function getSiswaByKelasId($id_kelas)
+    {
+        // Ambil semua id_user dari tabel kelas_user yang sesuai dengan id_kelas
+        $kelasUserIds = KelasUser::where('id_kelas', $id_kelas)->pluck('id_user')->toArray();
+
+        // Ambil semua user dengan roles 'Siswa' yang id_user-nya ada di kelasUserIds
+        $siswa = User::where('roles', 'Siswa')
+                    ->whereIn('id', $kelasUserIds)
+                    ->get();
 
         return response()->json($siswa);
     }

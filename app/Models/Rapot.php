@@ -5,26 +5,31 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class KelasUser extends Model
+class Rapot extends Model
 {
     use HasFactory;
 
-    protected $table = 'kelas_user';
-    protected $primaryKey = 'id_kelas_user';
+    protected $table = 'rapot';
 
     protected $fillable = [
-        'id_user',
+        'jenis',
+        'id_siswa',
         'id_kelas',
-        'status',
+        'semester',
     ];
 
-    public function user()
+    public function siswa()
     {
-        return $this->belongsTo(User::class, 'id_user');
+        return $this->belongsTo(User::class, 'id_siswa');
     }
 
     public function kelas()
     {
         return $this->belongsTo(Kelas::class, 'id_kelas');
+    }
+
+    public function rapotLines()
+    {
+        return $this->hasMany(RapotLine::class, 'id_rapot');
     }
 }

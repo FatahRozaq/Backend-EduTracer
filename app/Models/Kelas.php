@@ -46,4 +46,14 @@ class Kelas extends Model
     {
         return $this->hasMany(KelasMataPelajaran::class, 'id_kelas');
     }
+
+    public function wakel()
+    {
+        return $this->belongsTo(User::class, 'wakel_id');
+    }
+
+    public function rapots()
+    {
+        return $this->hasMany(Rapot::class, 'id_kelas');
+    }
 }

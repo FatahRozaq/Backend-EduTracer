@@ -17,9 +17,20 @@ class SuratIzin extends Model
         'id_user',
         'id_penerima',
         'id_kelas',
+        'id_anak',
         'tanggal',
         'jenis_surat',
         'deskripsi',
         'berkas_surat',
     ];
+
+    public function pengirim()
+    {
+        return $this->belongsTo(User::class, 'id_user');
+    }
+
+    public function anak()
+    {
+        return $this->belongsTo(User::class, 'id_anak');
+    }
 }

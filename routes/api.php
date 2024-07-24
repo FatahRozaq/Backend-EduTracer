@@ -48,6 +48,7 @@ Route::middleware([SetTimezone::class])->group(function () {
     Route::get('/absensi/status/siswa', [AbsensiController::class, 'getAttendanceStudentStatus']);
     Route::get('/absensi/status/mapel', [AbsensiController::class, 'getAttendanceStatus']);
     Route::get('/kelas/get', [AbsensiController::class, 'getKelas']);
+    Route::get('/absensi/guru/filter', [AbsensiController::class, 'getFilterAbsensi']);
 });
 
 // Route::get('/classes/{classId}/attendance', [AbsensiController::class, 'getClassAttendance']);
@@ -62,6 +63,8 @@ Route::middleware('auth:sanctum')->get('/orangtua/suratizin/{id}', [SuratIzinCon
 Route::middleware('auth:sanctum')->get('/guru/suratizin/{id}', [SuratIzinController::class, 'show']);
 Route::middleware('auth:sanctum')->post('/orangtua/suratizin', [SuratIzinController::class, 'store']);
 Route::middleware('auth:sanctum')->delete('/orangtua/suratizin/{id}', [SuratIzinController::class, 'destroy']);
+Route::middleware('auth:sanctum')->get('/guru/suratizin', [SuratIzinController::class, 'index']);
+
 
 
 //Kelas dan mata pelajaran
@@ -77,6 +80,7 @@ Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/addMataPelajaran', [K
 Route::middleware('auth:sanctum')->get('/kelas/{id_kelas}/mata-pelajaran', [KelasController::class, 'getMataPelajaran']); //menampilkan mata pelajaran dalam suatu kelas
 Route::middleware('auth:sanctum')->delete('/kelas-user/{id_kelas}', [KelasController::class, 'destroyKelasUser']);// menghapus kelas user
 Route::middleware('auth:sanctum')->post('/kelas/search', [KelasController::class, 'searchKelas']);
+Route::middleware('auth:sanctum')->get('/kelas/{id_kelas}/guru', [KelasController::class, 'getGuruInClass']);
 Route::middleware('auth:sanctum')->get('/kelas-by-wakel', [KelasController::class, 'getKelasByLoggedInWakel']);
 Route::middleware('auth:sanctum')->get('/kelas/{id_kelas}/pending-users', [KelasController::class, 'getPendingUsersByClassId']);
 Route::middleware('auth:sanctum')->get('/kelas/{id_kelas}/siswa', [KelasController::class, 'getSiswaByClassId']);

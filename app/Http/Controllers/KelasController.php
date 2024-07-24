@@ -315,7 +315,18 @@ class KelasController extends Controller
     }
 
 
-
+    public function getGuruInClass(Request $request, $id_kelas)
+    {
+        $kelas = Kelas::find($id_kelas);
+    
+        if (!$kelas) {
+            return response()->json(['message' => 'Kelas tidak ditemukan'], 404);
+        }
+    
+        $guruList = $kelas->user()->where('roles', 'Guru')->get();
+    
+        return response()->json($guruList, 200);
+    }
 
 
 }

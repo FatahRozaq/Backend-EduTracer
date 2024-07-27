@@ -5,12 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Models\SuratIzin;
+use Illuminate\Support\Facades\Storage;
 
 class SuratIzinController extends Controller
 {
     public function index()
     {
-        $suratIzins = SuratIzin::with(['pengirim', 'anak'])->get();
+        $userId = auth()->user()->id;
+        $suratIzins = SuratIzin::with(['pengirim', 'anak'])
+            ->where('id_user', $userId)
+            ->get();
         return response()->json($suratIzins);
     }
 
@@ -62,6 +66,11 @@ class SuratIzinController extends Controller
     public function show($id)
     {
         $suratIzin = SuratIzin::with(['pengirim', 'anak'])->findOrFail($id);
+        if (!$suratIzin->read_status) {
+            $suratIzin->read_status = true;
+            $suratIzin->save();
+        }
+
         return response()->json($suratIzin);
     }
 

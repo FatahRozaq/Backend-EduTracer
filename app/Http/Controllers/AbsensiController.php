@@ -313,69 +313,79 @@ class AbsensiController extends Controller
 
     public function getKelasMapel(Request $request)
     {
-        $idKelas = $request['id_kelas'];
-        $idMapel = $request['id_mata_pelajaran'];
-        $data = KelasMataPelajaran::where('id_kelas', $idKelas)
-                    ->where('id_mata_pelajaran', $idMapel)
-                    ->get();
+        try {
+            $idKelas = $request['id_kelas'];
+            $idMapel = $request['id_mata_pelajaran'];
+            $data = KelasMataPelajaran::where('id_kelas', $idKelas)
+                        ->where('id_mata_pelajaran', $idMapel)
+                        ->get();
 
-        return response()->json($data, 200);
+            return response()->json($data, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Terjadi kesalahan saat mengambil data kelas mata pelajaran.', 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function getAbsenSiswa(Request $request)
-{
-    $now = request('current_time');
+    {
+        try {
+            $now = request('current_time');
+            $idUser = $request['id_user'];
+            $idClass = KelasUser::where('id_user', $idUser)->value('id_kelas');
 
-    $idUser = $request['id_user'];
-    $idClass = KelasUser::where('id_user', $idUser)->value('id_kelas');
+            // Dapatkan semua jadwal berdasarkan id_kelas dan hari, dan urutkan berdasarkan jam_mulai
+            $absen = Jadwal::with('mataPelajaran')
+                        ->where('id_kelas', $idClass)
+                        ->where('hari', $now->dayName)
+                        ->orderBy('jam_mulai', 'asc') // Mengurutkan berdasarkan jam_mulai secara ascending
+                        ->get();
 
-    // Dapatkan semua jadwal berdasarkan id_kelas dan hari, dan urutkan berdasarkan jam_mulai
-    $absen = Jadwal::with('mataPelajaran')
-                ->where('id_kelas', $idClass)
-                ->where('hari', $now->dayName)
-                ->orderBy('jam_mulai', 'asc') // Mengurutkan berdasarkan jam_mulai secara ascending
-                ->get();
+            // Dapatkan daftar id_jadwal dari hasil query $absen
+            $idJadwalList = $absen->pluck('id_jadwal'); // Pluck the correct 'id_jadwal' field
 
-    // Dapatkan daftar id_jadwal dari hasil query $absen
-    $idJadwalList = $absen->pluck('id_jadwal'); // Pluck the correct 'id_jadwal' field
+            // Dapatkan pengajar berdasarkan id_jadwal
+            $pengajar = JadwalPengajar::with('user')
+                            ->whereIn('id_jadwal', $idJadwalList)
+                            ->get()
+                            ->groupBy('id_jadwal');
 
-    // Dapatkan pengajar berdasarkan id_jadwal
-    $pengajar = JadwalPengajar::with('user')
-                    ->whereIn('id_jadwal', $idJadwalList)
-                    ->get()
-                    ->groupBy('id_jadwal');
+            // Gabungkan data pengajar ke dalam setiap elemen absen
+            $absen = $absen->map(function($item) use ($pengajar) {
+                $item->pengajar = $pengajar->get($item->id_jadwal) ?? [];
+                return $item;
+            });
 
-    // Gabungkan data pengajar ke dalam setiap elemen absen
-    $absen = $absen->map(function($item) use ($pengajar) {
-        $item->pengajar = $pengajar->get($item->id_jadwal) ?? [];
-        return $item;
-    });
-
-    // Kembalikan respons JSON
-    return response()->json($absen);
-}
-
-
-public function getAbsenSiswaStatus(Request $request)
-{
-    $now = request('current_time');
-    $idUser = $request['id_user'];
-    $idJadwal = $request['id_jadwal'];
-    
-    $status = Absensi::where('id_user', $idUser)
-                ->where('id_jadwal', $idJadwal)
-                ->where('tanggal', $now->format('Y-m-d'))
-                ->get();
-
-    if ($status->isEmpty()) {
-        return response()->json(['message' => 'Belum absen']);
+            // Kembalikan respons JSON
+            return response()->json($absen);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Terjadi kesalahan saat mengambil data absen siswa.', 'message' => $e->getMessage()], 500);
+        }
     }
 
-    return response()->json([
-        'message' => 'Ada',
-        'status' => $status
-    ]);
-}
+    public function getAbsenSiswaStatus(Request $request)
+    {
+        try {
+            $now = request('current_time');
+            $idUser = $request['id_user'];
+            $idJadwal = $request['id_jadwal'];
+            
+            $status = Absensi::where('id_user', $idUser)
+                        ->where('id_jadwal', $idJadwal)
+                        ->where('tanggal', $now->format('Y-m-d'))
+                        ->get();
+
+            if ($status->isEmpty()) {
+                return response()->json(['message' => 'Belum absen']);
+            }
+
+            return response()->json([
+                'message' => 'Ada',
+                'status' => $status
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Terjadi kesalahan saat mengambil status absen siswa.', 'message' => $e->getMessage()], 500);
+        }
+    }
 
 
 

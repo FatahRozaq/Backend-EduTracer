@@ -22,6 +22,11 @@ class SuratIzin extends Model
         'jenis_surat',
         'deskripsi',
         'berkas_surat',
+        'read_status',
+    ];
+
+    protected $casts = [
+        'read_status' => 'boolean',
     ];
 
     public function pengirim()

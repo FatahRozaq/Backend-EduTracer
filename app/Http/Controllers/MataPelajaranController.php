@@ -174,7 +174,7 @@ class MataPelajaranController extends Controller
     public function storeMataPelajaranonly(Request $request)
     {
         $request->validate([
-            'kode_mapel' => 'required|string|max:255|unique:kode_mapel',
+            'kode_mapel' => 'required|string|max:255',
             'nama_mapel' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'id_user' => 'required|integer|exists:users,id',

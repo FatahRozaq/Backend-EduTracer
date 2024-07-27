@@ -6,16 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('jadwal', function (Blueprint $table) {
             $table->id('id_jadwal');
             $table->unsignedBiginteger('id_kelas');
             $table->unsignedBiginteger('id_mata_pelajaran');
-            $table->date('tanggal');
+            $table->string('hari');
             $table->time('jam_mulai')->nullable();
             $table->time('jam_akhir')->nullable();
             $table->timestamps();
@@ -28,9 +25,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('jadwals');

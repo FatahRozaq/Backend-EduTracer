@@ -9,11 +9,20 @@ use Illuminate\Support\Facades\Storage;
 
 class SuratIzinController extends Controller
 {
-    public function index()
+    public function indexOrtu()
     {
         $userId = auth()->user()->id;
-        $suratIzins = SuratIzin::with(['pengirim', 'anak'])
+        $suratIzins = SuratIzin::with(['pengirim', 'anak', 'penerima'])
             ->where('id_user', $userId)
+            ->get();
+        return response()->json($suratIzins);
+    }
+
+    public function indexGuru()
+    {
+        $userId = auth()->user()->id;
+        $suratIzins = SuratIzin::with(['pengirim', 'anak', 'penerima'])
+            ->where('id_penerima', $userId)
             ->get();
         return response()->json($suratIzins);
     }
@@ -65,7 +74,7 @@ class SuratIzinController extends Controller
 
     public function show($id)
     {
-        $suratIzin = SuratIzin::with(['pengirim', 'anak'])->findOrFail($id);
+        $suratIzin = SuratIzin::with(['pengirim', 'anak', 'penerima'])->findOrFail($id);
         if (!$suratIzin->read_status) {
             $suratIzin->read_status = true;
             $suratIzin->save();
@@ -99,5 +108,14 @@ class SuratIzinController extends Controller
         $suratIzin->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function markAsRead($id)
+    {
+        $suratIzin = SuratIzin::findOrFail($id);
+        $suratIzin->read_status = true;
+        $suratIzin->save();
+
+        return response()->json(['message' => 'Surat Izin telah dibaca']);
     }
 }

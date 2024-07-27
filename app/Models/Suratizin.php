@@ -38,4 +38,9 @@ class SuratIzin extends Model
     {
         return $this->belongsTo(User::class, 'id_anak');
     }
+
+    public function penerima()
+    {
+        return $this->belongsTo(User::class, 'id_penerima');
+    }
 }

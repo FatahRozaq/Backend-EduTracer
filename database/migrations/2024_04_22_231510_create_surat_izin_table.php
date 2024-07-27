@@ -13,15 +13,18 @@ class CreateSuratIzinTable extends Migration
             $table->unsignedBigInteger('id_user');
             $table->unsignedBigInteger('id_penerima');
             $table->unsignedBigInteger('id_kelas');
+            $table->unsignedBigInteger('id_anak')->nullable();
             $table->date('tanggal');
             $table->string('jenis_surat', 5);
             $table->string('deskripsi', 255);
             $table->string('berkas_surat', 255)->nullable();
+            $table->boolean('read_status')->default(false);
             $table->timestamps();
 
             $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('id_penerima')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('id_kelas')->references('id_kelas')->on('kelas')->onDelete('cascade');
+            $table->foreign('id_anak')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

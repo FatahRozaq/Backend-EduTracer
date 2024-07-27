@@ -62,32 +62,6 @@ class KelasController extends Controller
         return response()->json($kelas, 200);
     }
 
-    public function create(Request $request)
-    {
-        $request->validate([
-            'nama_kelas' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'enrollment_key' => 'nullable|string|max:255|unique:kelas,enrollment_key',
-        ]);
-
-        $kelas = Kelas::create([
-            'nama_kelas' => $request->nama_kelas,
-            'deskripsi' => $request->deskripsi,
-            'enrollment_key' => $request->enrollment_key,
-        ]);
-
-        $user = Auth::user();
-
-        KelasUser::create([
-            'id_user' => $user->id,
-            'id_kelas' => $kelas->id_kelas,
-        ]);
-
-        return response()->json([
-            'message' => 'Kelas berhasil dibuat',
-            'kelas' => $kelas,
-        ], 201);
-    }
 
     public function addMataPelajaran(Request $request, $id_kelas)
     {
@@ -134,6 +108,33 @@ class KelasController extends Controller
         return response()->json([
             'message' => 'Anda berhasil mendaftar ke kelas.',
             'kelas' => $kelas,
+        ], 201);
+    }
+
+    public function addMataPelajaranByKode(Request $request, $id_kelas)
+    {
+        // Validate the request
+        $request->validate([
+            'kode_mapel' => 'required|string|exists:mata_pelajaran,kode_mapel',
+        ]);
+
+        // Find the class
+        $kelas = Kelas::findOrFail($id_kelas);
+
+        // Find the subject by kode_mapel
+        $mataPelajaran = MataPelajaran::where('kode_mapel', $request->kode_mapel)->firstOrFail();
+
+        // Add the subject to the class
+        KelasMataPelajaran::create([
+            'id_kelas' => $kelas->id_kelas,
+            'id_mata_pelajaran' => $mataPelajaran->id_mata_pelajaran,
+        ]);
+
+        // Return response
+        return response()->json([
+            'message' => 'Mata pelajaran berhasil ditambahkan ke kelas',
+            'kelas' => $kelas,
+            'mata_pelajaran' => $mataPelajaran,
         ], 201);
     }
 
@@ -244,15 +245,6 @@ class KelasController extends Controller
         return response()->json($kelas);
     }
 
-    public function getPendingUsersByClassId(Request $request, $id_kelas)
-    {
-        $kelas = Kelas::findOrFail($id_kelas);
-
-        // Get users where the status is pending
-        $users = $kelas->user()->wherePivot('status', 'Pending')->get();
-
-        return response()->json($users, 200);
-    }
 
 
     public function getSiswaByClassId($id_kelas)
@@ -262,24 +254,14 @@ class KelasController extends Controller
         // Get users with the role 'Siswa' connected to the class and include the pivot table status
         $siswa = $kelas->user()->where('roles', 'Siswa')->withPivot('status')->get();
 
-        // $siswaWithStatus = $siswa->map(function ($user) {
-        //     return [
-        //         'id' => $user->id,
-        //         'nama' => $user->name,
-        //         'email' => $user->email,
-        //         'roles' => $user->roles,
-        //         'status' => $user->pivot->status,
-        //     ];
-        // });
 
         return response()->json($siswa, 200);
     }
 
-    public function getUSerByClassId($id_kelas)
+    public function getUserByClassId($id_kelas)
     {
         $kelas = Kelas::findOrFail($id_kelas);
 
-        // Get users with the role 'Siswa' connected to the class and include the pivot table status
         $user = $kelas->user()->withPivot('status')->get();
 
 

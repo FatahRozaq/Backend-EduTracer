@@ -47,12 +47,15 @@ class TugasController extends Controller
 
     public function store(Request $request)
     {
+        $idKelas = $request['id_kelas'];
+        $idMapel = $request['id_mata_pelajaran'];
         try {
             $validatedData = $request->validate([
                 'nama_tugas' => 'required',
                 'deskripsi' => 'required',
                 'status' => 'required',
                 'tenggat_tugas' => 'required|date',
+                'id_kelas_mata_pelajaran' => 'required'
             ]);
 
             $tugas = Tugas::create($validatedData);

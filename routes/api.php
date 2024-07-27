@@ -64,13 +64,14 @@ Route::middleware([SetTimezone::class])->group(function () {
 
 
 //Surat Izin
-Route::middleware('auth:sanctum')->put('/orangtua/suratizin/{id}', [SuratIzinController::class, 'update']);
-Route::middleware('auth:sanctum')->get('/orangtua/suratizin', [SuratIzinController::class, 'index']);
+Route::middleware('auth:sanctum')->get('/orangtua/suratizin', [SuratIzinController::class, 'indexOrtu']);
+Route::middleware('auth:sanctum')->get('/guru/suratizin', [SuratIzinController::class, 'indexGuru']);
+Route::middleware('auth:sanctum')->post('/orangtua/suratizin', [SuratIzinController::class, 'store']);
 Route::middleware('auth:sanctum')->get('/orangtua/suratizin/{id}', [SuratIzinController::class, 'show']);
 Route::middleware('auth:sanctum')->get('/guru/suratizin/{id}', [SuratIzinController::class, 'show']);
-Route::middleware('auth:sanctum')->post('/orangtua/suratizin', [SuratIzinController::class, 'store']);
+Route::middleware('auth:sanctum')->put('/orangtua/suratizin/{id}', [SuratIzinController::class, 'update']);
 Route::middleware('auth:sanctum')->delete('/orangtua/suratizin/{id}', [SuratIzinController::class, 'destroy']);
-Route::middleware('auth:sanctum')->get('/guru/suratizin', [SuratIzinController::class, 'index']);
+Route::middleware('auth:sanctum')->post('/guru/suratizin/read/{id}', [SuratIzinController::class, 'markAsRead']);
 
 
 

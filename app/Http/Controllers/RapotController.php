@@ -12,12 +12,7 @@ use Illuminate\Support\Facades\Auth;
 
 class RapotController extends Controller
 {
-    /**
-     * Create a new Rapot.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+    
     public function createRapot(Request $request)
     {
         // Validate the request data
@@ -67,13 +62,6 @@ class RapotController extends Controller
             'rapot' => $rapot,
         ], 201);
     }
-
-    /**
-     * Create a new RapotLine.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function createRapotLine(Request $request)
     {
         // Validate the request data

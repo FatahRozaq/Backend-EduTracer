@@ -115,6 +115,8 @@ Route::middleware('auth:sanctum')->put('/mata-pelajaran/update/{id_mata_pelajara
 Route::middleware('auth:sanctum')->delete('/mata-pelajaran/destroy/{id_mata_pelajaran}', [MataPelajaranController::class, 'destroyMataPelajaran']);
 Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/add-mata-pelajaran-by-kode', [KelasController::class, 'addMataPelajaranByKode']);
 Route::middleware('auth:sanctum')->get('/mata-pelajaran/{id_mata_pelajaran}/pengajar', [MataPelajaranController::class, 'getPengajarByMataPelajaran']);
+Route::middleware('auth:sanctum')->post('/mata-pelajaran/{mataPelajaranId}/pengajaradd', [MataPelajaranController::class, 'addPengajarToMataPelajaran']);
+
 
 // Route::middleware('auth:sanctum')->get('/tugas-kelas-mata-pelajaran', [TugasKelasMataPelajaranController::class, 'getTugasByUser']);
 // Route::middleware('auth:sanctum')->post('/tugas-kelas-mata-pelajaran/search', [TugasKelasMataPelajaranController::class, 'searchTugas']);

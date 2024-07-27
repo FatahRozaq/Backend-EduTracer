@@ -158,10 +158,8 @@ class MataPelajaranController extends Controller
 
     public function getPengajarByMataPelajaran($id_mata_pelajaran)
     {
-        // Cari mata pelajaran berdasarkan ID
         $mataPelajaran = MataPelajaran::findOrFail($id_mata_pelajaran);
 
-        // Dapatkan semua pengajar yang terkait dengan mata pelajaran ini
         $pengajar = $mataPelajaran->pengajar()->with('user')->get();
 
         return response()->json([
@@ -174,7 +172,7 @@ class MataPelajaranController extends Controller
     public function storeMataPelajaranonly(Request $request)
     {
         $request->validate([
-            'kode_mapel' => 'required|string|max:255|unique:kode_mapel',
+            'kode_mapel' => 'required|string|max:255|unique:mata_pelajaran,kode_mapel',
             'nama_mapel' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'id_user' => 'required|integer|exists:users,id',
@@ -192,6 +190,35 @@ class MataPelajaranController extends Controller
             'message' => 'Mata pelajaran berhasil dibuat dan ditambahkan ke kelas, serta relasi guru berhasil dibuat',
             'mata_pelajaran' => $mataPelajaran,
         ], 201);
+    }
+
+    public function addPengajarToMataPelajaran(Request $request, $mataPelajaranId)
+    {
+        $validatedData = $request->validate([
+            'id_kelas' => 'required|exists:kelas,id_kelas',
+            'id_user' => 'required|exists:users,id',
+        ]);
+        $existingAssignment = PengajarMapel::where('id_mata_pelajaran', $mataPelajaranId)
+                                           ->where('id_kelas', $validatedData['id_kelas'])
+                                           ->where('id_user', $validatedData['id_user'])
+                                           ->first();
+
+        if ($existingAssignment) {
+            return response()->json(['message' => 'Pengajar already assigned to this class and subject'], 409);
+        }
+
+        PengajarMapel::create([
+            'id_mata_pelajaran' => $mataPelajaranId,
+            'id_kelas' => $validatedData['id_kelas'],
+            'id_user' => $validatedData['id_user'],
+        ]);
+
+        KelasUser::updateOrCreate(
+            ['id_kelas' => $validatedData['id_kelas'], 'id_user' => $validatedData['id_user']],
+            ['status' => 'Confirm']
+        );
+
+        return response()->json(['message' => 'Pengajar added successfully'], 201);
     }
 
 

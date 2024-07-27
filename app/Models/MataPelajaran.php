@@ -10,7 +10,6 @@ class MataPelajaran extends Model
     use HasFactory;
     protected $table = 'mata_pelajaran';
 
-    protected $table = 'mata_pelajaran';
     protected $primaryKey = 'id_mata_pelajaran';
 
     protected $fillable = [
@@ -31,5 +30,10 @@ class MataPelajaran extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id');
+    }
+
+    public function pengajar()
+    {
+        return $this->hasMany(PengajarMapel::class, 'id_mata_pelajaran');
     }
 }

@@ -151,9 +151,9 @@ class KelasController extends Controller
         // Temukan kelas berdasarkan ID
         $kelas = Kelas::findOrFail($id_kelas);
 
-        // Hapus semua relasi mata pelajaran terkait dengan kelas ini
-        KelasMataPelajaran::where('id_kelas', $id_kelas)->delete();
-        KelasUser::where('id_kelas', $id_kelas)->delete();
+        // // Hapus semua relasi mata pelajaran terkait dengan kelas ini
+        // KelasMataPelajaran::where('id_kelas', $id_kelas)->delete();
+        // KelasUser::where('id_kelas', $id_kelas)->delete();
 
         // Hapus kelas
         $kelas->delete();

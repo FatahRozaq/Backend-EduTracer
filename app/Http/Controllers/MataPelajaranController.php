@@ -7,7 +7,7 @@ use App\Models\Kelas;
 use App\Models\KelasUser;
 use App\Models\KelasMataPelajaran;
 use App\Models\MataPelajaran;
-use App\Models\MapelGuru;
+use App\Models\PengajarMapel;
 
 class MataPelajaranController extends Controller
 {
@@ -44,7 +44,7 @@ class MataPelajaranController extends Controller
         ]);
 
         // Buat relasi dengan mapel guru
-        MapelGuru::create([
+        PengajarMapel::create([
             'id_mata_pelajaran' => $mataPelajaran->id_mata_pelajaran,
             'id_user' => $request->id_user,
         ]);
@@ -147,26 +147,40 @@ class MataPelajaranController extends Controller
     {
         $userId = Auth::id();
 
-        $mataPelajaran = MapelGuru::where('id_user', $userId)
-                                  ->with('mataPelajaran')
-                                  ->get()
-                                  ->pluck('mataPelajaran');
+        // $mataPelajaran = PengajarMapel::where('id_user', $userId)
+        //                           ->with('mataPelajaran')
+        //                           ->get()
+        //                           ->pluck('mataPelajaran');
+        $mataPelajaran = MataPelajaran::where('id_user', $userId)->get();
 
         return response()->json($mataPelajaran, 200);
+    }
+
+    public function getPengajarByMataPelajaran($id_mata_pelajaran)
+    {
+        // Cari mata pelajaran berdasarkan ID
+        $mataPelajaran = MataPelajaran::findOrFail($id_mata_pelajaran);
+
+        // Dapatkan semua pengajar yang terkait dengan mata pelajaran ini
+        $pengajar = $mataPelajaran->pengajar()->with('user')->get();
+
+        return response()->json([
+            'message' => 'Pengajar fetched successfully',
+            'pengajar' => $pengajar,
+        ], 200);
     }
 
 
     public function storeMataPelajaranonly(Request $request)
     {
-        // Validasi data input
         $request->validate([
-            'kode_mapel' => 'required|string|max:255',
+            'kode_mapel' => 'required|string|max:255|unique:kode_mapel',
             'nama_mapel' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'id_user' => 'required|integer|exists:users,id',
         ]);
 
-        // Buat mata pelajaran baru
+        
         $mataPelajaran = MataPelajaran::create([
             'kode_mapel' => $request->kode_mapel,
             'nama_mapel' => $request->nama_mapel,
@@ -174,14 +188,6 @@ class MataPelajaranController extends Controller
             'id_user' => $request->id_user,
         ]);
 
-
-        // Buat relasi dengan mapel guru
-        MapelGuru::create([
-            'id_mata_pelajaran' => $mataPelajaran->id_mata_pelajaran,
-            'id_user' => $request->id_user,
-        ]);
-
-        // Kembalikan response
         return response()->json([
             'message' => 'Mata pelajaran berhasil dibuat dan ditambahkan ke kelas, serta relasi guru berhasil dibuat',
             'mata_pelajaran' => $mataPelajaran,

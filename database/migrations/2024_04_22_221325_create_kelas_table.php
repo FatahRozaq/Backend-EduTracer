@@ -16,7 +16,10 @@ return new class extends Migration
             $table->string('nama_kelas');
             $table->string('deskripsi')->nullable();
             $table->string('enrollment_key')->unique();
+            $table->unsignedBigInteger('wakel_id')->nullable(); // Add this line
             $table->timestamps();
+
+            $table->foreign('wakel_id')->references('id')->on('users')->onDelete('set null'); // Add this line
         });
     }
 

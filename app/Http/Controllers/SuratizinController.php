@@ -10,7 +10,7 @@ class SuratIzinController extends Controller
 {
     public function index()
     {
-        $suratIzins = SuratIzin::all();
+        $suratIzins = SuratIzin::with(['pengirim', 'anak'])->get();
         return response()->json($suratIzins);
     }
 
@@ -23,6 +23,7 @@ class SuratIzinController extends Controller
                 'id_user' => 'required|integer',
                 'id_penerima' => 'required|integer',
                 'id_kelas' => 'required|integer',
+                'id_anak' => 'required|integer',
                 'tanggal' => 'required|date',
                 'jenis_surat' => 'required|string',
                 'deskripsi' => 'required|string',
@@ -35,6 +36,7 @@ class SuratIzinController extends Controller
             $suratIzin->id_user = $request->id_user;
             $suratIzin->id_penerima = $request->id_penerima;
             $suratIzin->id_kelas = $request->id_kelas;
+            $suratIzin->id_anak = $request->id_anak;
             $suratIzin->tanggal = $request->tanggal;
             $suratIzin->jenis_surat = $request->jenis_surat;
             $suratIzin->deskripsi = $request->deskripsi;
@@ -57,11 +59,9 @@ class SuratIzinController extends Controller
         }
     }
 
-
-
     public function show($id)
     {
-        $suratIzin = SuratIzin::findOrFail($id);
+        $suratIzin = SuratIzin::with(['pengirim', 'anak'])->findOrFail($id);
         return response()->json($suratIzin);
     }
 
@@ -71,6 +71,7 @@ class SuratIzinController extends Controller
             'id_user' => 'required|exists:users,id',
             'id_penerima' => 'required|exists:users,id',
             'id_kelas' => 'required|exists:kelas,id_kelas',
+            'id_anak' => 'required|exists:users,id',
             'tanggal' => 'required|date',
             'jenis_surat' => 'required|string|max:5',
             'deskripsi' => 'required|string|max:255',

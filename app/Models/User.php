@@ -80,4 +80,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(User::class, 'parent_child', 'parent_id', 'child_id')->withPivot('status');
     }
+
+    public function rapots()
+    {
+        return $this->hasMany(Rapot::class, 'id_siswa');
+    }
 }

@@ -7,6 +7,7 @@ use App\Models\Kelas;
 use App\Models\KelasUser;
 use App\Models\KelasMataPelajaran;
 use App\Models\MataPelajaran;
+use App\Models\MapelGuru;
 
 class MataPelajaranController extends Controller
 {
@@ -35,9 +36,22 @@ class MataPelajaranController extends Controller
             'id_mata_pelajaran' => $mataPelajaran->id_mata_pelajaran,
         ]);
 
+        //kelas user
+        KelasUser::create([
+            'id_kelas' => $id_kelas,
+            'id_user' => $request->id_user,
+            'status' => 'Confirm',
+        ]);
+
+        // Buat relasi dengan mapel guru
+        MapelGuru::create([
+            'id_mata_pelajaran' => $mataPelajaran->id_mata_pelajaran,
+            'id_user' => $request->id_user,
+        ]);
+
         // Kembalikan response
         return response()->json([
-            'message' => 'Mata pelajaran berhasil dibuat dan ditambahkan ke kelas',
+            'message' => 'Mata pelajaran berhasil dibuat dan ditambahkan ke kelas, serta relasi guru berhasil dibuat',
             'mata_pelajaran' => $mataPelajaran,
         ], 201);
     }
@@ -128,6 +142,33 @@ class MataPelajaranController extends Controller
         ], 200);
     }
 
+    public function getMataPelajaranByLoggedInUser()
+    {
+        $userId = Auth::id();
+
+        $mataPelajaran = MapelGuru::where('id_user', $userId)
+                                  ->with('mataPelajaran')
+                                  ->get()
+                                  ->pluck('mataPelajaran');
+
+        return response()->json($mataPelajaran, 200);
+    }
+
+    public function getMataPelajaranNotInKelas($id_kelas)
+    {
+        // Subquery to get all the mata pelajaran IDs in the specified kelas
+        $mapelIdsInKelas = KelasMataPelajaran::where('id_kelas', $id_kelas)
+                                             ->pluck('id_mata_pelajaran');
+
+        // Get all mata pelajaran that are not in the specified kelas
+        $mataPelajaranNotInKelas = MataPelajaran::whereNotIn('id_mata_pelajaran', $mapelIdsInKelas)
+                                                ->get();
+
+        return response()->json([
+            'message' => 'Mata pelajaran yang tidak ada di kelas berhasil diambil.',
+            'mata_pelajaran' => $mataPelajaranNotInKelas,
+        ], 200);
+    }
 
 
 }

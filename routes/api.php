@@ -39,6 +39,9 @@ Route::middleware('auth:sanctum')->get('/jadwal/{id}', [JadwalController::class,
 Route::middleware('auth:sanctum')->put('/jadwal/{id}', [JadwalController::class, 'update']);
 Route::middleware('auth:sanctum')->delete('/jadwal/{id}', [JadwalController::class, 'destroy']);
 
+//jadwal Pengajar
+Route::get('jadwal-pengajar', [JadwalController::class, 'getJadwalPengajar']);
+
 
 //tugas
 Route::get('/guru/tugas', [TugasController::class, 'index']);

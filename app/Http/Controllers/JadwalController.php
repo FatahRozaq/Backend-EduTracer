@@ -52,6 +52,17 @@ class JadwalController extends Controller
         return response()->json($jadwal, 201);
     }
 
+    public function getJadwalPengajar()
+    {
+        $userId = Auth::id();
+        $jadwal = Jadwal::whereHas('mataPelajaran', function ($query) use ($userId) {
+            $query->where('id_user', $userId);
+        })->with(['kelas', 'mataPelajaran'])->get();
+
+        return response()->json($jadwal);
+    }
+
+
     public function show($id)
     {
         $jadwal = Jadwal::with(['kelas', 'mataPelajaran'])->findOrFail($id);

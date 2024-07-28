@@ -10,11 +10,19 @@ use Illuminate\Support\Facades\Log;
 
 class JadwalController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $userId = Auth::id();
-        Log::info('Fetching jadwals for user: ' . $userId);
-        $jadwals = Jadwal::with(['kelas', 'mataPelajaran'])->get();
+        $kelasId = $request->query('kelas_id');
+        
+        Log::info('Fetching jadwals for user: ' . $userId . ' in class: ' . $kelasId);
+        
+        $jadwals = Jadwal::with(['kelas', 'mataPelajaran'])
+            ->where('id_kelas', $kelasId)
+            ->get();
+
+        Log::info('Jadwals fetched: ', $jadwals->toArray());
+
         return response()->json($jadwals);
     }
 
@@ -47,10 +55,11 @@ class JadwalController extends Controller
             'jam_akhir' => $request->jam_akhir,
         ]);
 
-        $jadwal->load('kelas', 'mataPelajaran'); // Load related models
+        $jadwal->load('kelas', 'mataPelajaran');
 
         return response()->json($jadwal, 201);
     }
+
 
     public function show($id)
     {

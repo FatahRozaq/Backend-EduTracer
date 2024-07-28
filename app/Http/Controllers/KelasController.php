@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Kelas;
@@ -10,7 +11,7 @@ use App\Models\MataPelajaran;
 
 class KelasController extends Controller
 {
-    
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -25,9 +26,9 @@ class KelasController extends Controller
             $kelas->nama_kelas = $request->nama_kelas;
             $kelas->deskripsi = $request->deskripsi;
             $kelas->enrollment_key = $request->enrollment_key;
-            $kelas->wakel_id= $request->id_user;
+            $kelas->wakel_id = $request->id_user;
             $kelas->save();
-            
+
             $kelasUser = new KelasUser();
             $kelasUser->id_kelas = $kelas->id_kelas;
             $kelasUser->id_user = $request->id_user;
@@ -43,7 +44,51 @@ class KelasController extends Controller
         }
     }
 
-    
+    public function getKelasByGuru()
+    {
+        $userId = Auth::id();
+        $kelas = KelasUser::where('id_user', $userId)
+            ->where('status', 'Confirm')
+            ->with('kelas')
+            ->get()
+            ->pluck('kelas');
+
+        return response()->json($kelas);
+    }
+
+    public function getKelasBySiswa()
+    {
+        $userId = Auth::id();
+        $kelas = KelasUser::where('id_user', $userId)
+            ->where('status', 'Confirm')
+            ->with('kelas')
+            ->get()
+            ->pluck('kelas');
+
+        return response()->json($kelas);
+    }
+
+    public function getKelasAnak()
+    {
+        $parent = Auth::user();
+        $children = $parent->childrenMany()->wherePivot('status', 'Confirm')->get();
+        $kelasList = [];
+
+        foreach ($children as $child) {
+            $kelas = KelasUser::where('id_user', $child->id)
+                ->where('status', 'Confirm')
+                ->with('kelas')
+                ->get()
+                ->pluck('kelas');
+
+            foreach ($kelas as $k) {
+                $kelasList[] = $k;
+            }
+        }
+
+        return response()->json($kelasList);
+    }
+
     public function getKelasByUserId(Request $request)
     {
         $user = Auth::user();
@@ -82,7 +127,7 @@ class KelasController extends Controller
             'kelas' => $kelas,
         ], 201);
     }
-    
+
 
     public function enroll(Request $request)
     {
@@ -169,7 +214,7 @@ class KelasController extends Controller
         $request->validate([
             'nama_kelas' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'enrollment_key' => 'nullable|string|max:255|unique:kelas,enrollment_key,' . $id_kelas . ',id_kelas', 
+            'enrollment_key' => 'nullable|string|max:255|unique:kelas,enrollment_key,' . $id_kelas . ',id_kelas',
         ]);
 
         // Temukan kelas berdasarkan ID
@@ -196,8 +241,8 @@ class KelasController extends Controller
 
         // Temukan relasi kelas_user berdasarkan id_kelas dan id_user yang sedang login
         $kelasUser = KelasUser::where('id_kelas', $id_kelas)
-                            ->where('id_user', $user->id)
-                            ->first();
+            ->where('id_user', $user->id)
+            ->first();
 
         if ($kelasUser) {
             // Hapus relasi kelas_user
@@ -226,8 +271,8 @@ class KelasController extends Controller
 
         // Cari kelas berdasarkan nama atau deskripsi yang sesuai dengan istilah pencarian
         $kelas = Kelas::where('nama_kelas', 'LIKE', "%{$searchTerm}%")
-                        ->orWhere('deskripsi', 'LIKE', "%{$searchTerm}%")
-                        ->get();
+            ->orWhere('deskripsi', 'LIKE', "%{$searchTerm}%")
+            ->get();
 
         return response()->json([
             'message' => 'Pencarian berhasil.',
@@ -300,15 +345,13 @@ class KelasController extends Controller
     public function getGuruInClass(Request $request, $id_kelas)
     {
         $kelas = Kelas::find($id_kelas);
-    
+
         if (!$kelas) {
             return response()->json(['message' => 'Kelas tidak ditemukan'], 404);
         }
-    
+
         $guruList = $kelas->user()->where('roles', 'Guru')->get();
-    
+
         return response()->json($guruList, 200);
     }
-
-
 }

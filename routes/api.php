@@ -9,6 +9,7 @@ use App\Http\Controllers\KelasController;
 use App\Http\Controllers\TugasController;
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\JadwalController;
+use App\Http\Controllers\JadwalPengajarController;
 
 use App\Http\Controllers\ParentChildController;
 use App\Http\Controllers\UserController;
@@ -40,7 +41,7 @@ Route::middleware('auth:sanctum')->put('/jadwal/{id}', [JadwalController::class,
 Route::middleware('auth:sanctum')->delete('/jadwal/{id}', [JadwalController::class, 'destroy']);
 
 //jadwal Pengajar
-Route::get('jadwal-pengajar', [JadwalController::class, 'getJadwalPengajar']);
+Route::get('jadwal-pengajar', [JadwalPengajarController::class, 'getJadwalPengajar']);
 
 
 //tugas
@@ -97,6 +98,10 @@ Route::middleware('auth:sanctum')->delete('/kelas/{id_kelas}', [KelasController:
 Route::middleware('auth:sanctum')->put('/kelas/{id_kelas}', [KelasController::class, 'update']);
 Route::middleware('auth:sanctum')->get('/kelas/getkelasuser', [KelasController::class, 'getKelasByUserId']);
 Route::middleware('auth:sanctum')->get('/kelas/pendingKelas', [KelasController::class, 'getKelasPending']);
+Route::get('kelas-guru', [KelasController::class, 'getKelasByGuru'])->middleware('auth:sanctum');
+Route::middleware('auth:sanctum')->get('/kelas-siswa', [KelasController::class, 'getKelasBySiswa']);
+Route::middleware('auth:sanctum')->get('/parent-child/kelas-anak', [ParentChildController::class, 'getKelasAnak']);
+
 // Route::get('/kelas/user', [KelasController::class, 'getKelasByUserId']); // gabungan
 
 Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/addMataPelajaran', [KelasController::class, 'addMataPelajaran']);

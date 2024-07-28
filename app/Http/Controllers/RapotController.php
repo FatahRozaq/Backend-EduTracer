@@ -187,6 +187,22 @@ class RapotController extends Controller
     }
 
 
+    public function getRapotsByStudent($studentId)
+    {
+        // Validate if the student exists
+        $student = User::findOrFail($studentId);
+
+        // Fetch all rapots for the student
+        $rapots = Rapot::where('id_siswa', $studentId)->with(['siswa', 'kelas'])->get();
+
+        return response()->json([
+            'message' => 'Rapots fetched successfully',
+            'rapots' => $rapots,
+        ], 200);
+    }
+
+
+
 
 
 }

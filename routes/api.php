@@ -114,6 +114,7 @@ Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/confirm-student', [Ke
 
 //Mata pelajaran
 Route::middleware('auth:sanctum')->get('/mapel-guru', [MataPelajaranController::class, 'getMataPelajaranByLoggedInUser']);
+Route::middleware('auth:sanctum')->get('/mapel-pengajar', [MataPelajaranController::class, 'getMataPelajaranByLoggedInPengajar']);
 Route::middleware('auth:sanctum')->post('/mapel/{id_kelas}/create', [MataPelajaranController::class, 'storeMataPelajaran']);
 Route::middleware('auth:sanctum')->post('/mapel/create', [MataPelajaranController::class, 'storeMataPelajaranonly']);
 Route::middleware('auth:sanctum')->delete('/kelas/{id_kelas}/mata-pelajaran/{id_mata_pelajaran}', [MataPelajaranController::class, 'destroyKelasMataPelajaran']);
@@ -139,6 +140,7 @@ Route::post('/rapot/get', [RapotController::class, 'getRapotId']);
 Route::post('/rapot/check', [RapotController::class, 'checkRapot']);
 Route::middleware('auth:sanctum')->put('/rapot-line/{id_rapot_line}', [RapotController::class, 'updateRapotLine']);
 Route::middleware('auth:sanctum')->get('/rapot/siswa', [RapotController::class, 'getRapotsByLoggedInStudent']);
+Route::middleware('auth:sanctum')->get('/students/{studentId}/rapots', [RapotController::class, 'getRapotsByStudent']);
 
 
 

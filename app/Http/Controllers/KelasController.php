@@ -113,24 +113,19 @@ class KelasController extends Controller
 
     public function addMataPelajaranByKode(Request $request, $id_kelas)
     {
-        // Validate the request
         $request->validate([
             'kode_mapel' => 'required|string|exists:mata_pelajaran,kode_mapel',
         ]);
 
-        // Find the class
         $kelas = Kelas::findOrFail($id_kelas);
 
-        // Find the subject by kode_mapel
         $mataPelajaran = MataPelajaran::where('kode_mapel', $request->kode_mapel)->firstOrFail();
 
-        // Add the subject to the class
         KelasMataPelajaran::create([
             'id_kelas' => $kelas->id_kelas,
             'id_mata_pelajaran' => $mataPelajaran->id_mata_pelajaran,
         ]);
 
-        // Return response
         return response()->json([
             'message' => 'Mata pelajaran berhasil ditambahkan ke kelas',
             'kelas' => $kelas,

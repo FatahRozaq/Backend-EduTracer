@@ -156,6 +156,19 @@ class MataPelajaranController extends Controller
         return response()->json($mataPelajaran, 200);
     }
 
+    public function getMataPelajaranByLoggedInPengajar()
+    {
+        $userId = Auth::id();
+
+        $mataPelajaran = PengajarMapel::where('id_user', $userId)
+                                  ->with('mataPelajaran')
+                                  ->get()
+                                  ->pluck('mataPelajaran');
+        // $mataPelajaran = MataPelajaran::where('id_user', $userId)->get();
+
+        return response()->json($mataPelajaran, 200);
+    }
+
     public function getPengajarByMataPelajaran($id_mata_pelajaran)
     {
         $mataPelajaran = MataPelajaran::findOrFail($id_mata_pelajaran);
@@ -198,6 +211,7 @@ class MataPelajaranController extends Controller
             'id_kelas' => 'required|exists:kelas,id_kelas',
             'id_user' => 'required|exists:users,id',
         ]);
+
         $existingAssignment = PengajarMapel::where('id_mata_pelajaran', $mataPelajaranId)
                                            ->where('id_kelas', $validatedData['id_kelas'])
                                            ->where('id_user', $validatedData['id_user'])
@@ -217,6 +231,11 @@ class MataPelajaranController extends Controller
             ['id_kelas' => $validatedData['id_kelas'], 'id_user' => $validatedData['id_user']],
             ['status' => 'Confirm']
         );
+
+        KelasMataPelajaran::create([
+            'id_mata_pelajaran' => $mataPelajaranId,
+            'id_kelas' => $validatedData['id_kelas'],
+        ]);
 
         return response()->json(['message' => 'Pengajar added successfully'], 201);
     }

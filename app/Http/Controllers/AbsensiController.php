@@ -15,36 +15,36 @@ use App\Models\KelasMataPelajaran;
 
 class AbsensiController extends Controller
 {
+    public function __construct()
+    {
+        Carbon::setLocale('id');
+    }
+
+    private function getCurrentTime()
+    {
+        return Carbon::now('Asia/Jakarta');
+    }
+
     public function getKelas()
     {
         $kelas = Kelas::all();
-
         return response()->json($kelas);
     }
+
     public function getAvailableSchedules($classId)
     {
         try {
-            $now = request('current_time');
+            $now = $this->getCurrentTime();
             $dayName = $now->dayName;
-
-            // $schedules = Jadwal::where('id_kelas', $classId)
-            //             ->where('hari', 'LIKE', '%' . $dayName . '%')
-            //             // ->where('jam_mulai', '<=', $now->format('H:i:s'))
-            //             // ->where('jam_akhir', '>=', $now->format('H:i:s'))
-            //             ->get();
 
             $schedules = Jadwal::with('kelas')
                 ->where('id_kelas', $classId)
                 ->where('hari', 'LIKE', '%' . $dayName . '%')
                 ->get();
 
-                $namaKelas = $schedules->map(function ($schedule) {
-                    return $schedule->kelas->nama_kelas;
-                });
-
-            dd($namaKelas);
-
-            return response()->json($schedules);
+            $namaKelas = $schedules->map(function ($schedule) {
+                return $schedule->kelas->nama_kelas;
+            });
 
             if ($schedules->isEmpty()) {
                 return response()->json([
@@ -56,7 +56,6 @@ class AbsensiController extends Controller
 
             $schedules = $schedules->map(function ($schedule) use ($dayName) {
                 $schedule->hari = $dayName;
-                // $schedule->id_guru = $schedule->kelas->nama_kelas;
                 $schedule->id_kelas = $schedule->kelas->nama_kelas;
                 return $schedule;
             });
@@ -84,7 +83,6 @@ class AbsensiController extends Controller
                             ->get();
 
         return response()->json($studentInClass);
-
     }
 
     public function getAttendance(Request $request)
@@ -92,7 +90,6 @@ class AbsensiController extends Controller
         try {
             $date = $request['tanggal'];
             $idSubjectClass = $request['idKelasMataPelajaran'];
-
             $formattedDate = Carbon::parse($date)->format('Y-m-d');
 
             $presence = Absensi::with('user')
@@ -100,8 +97,7 @@ class AbsensiController extends Controller
                             ->where('tanggal', $formattedDate)
                             ->get();
 
-            if(!$presence)
-            {
+            if(!$presence) {
                 return response()->json(['message' => 'gagal mengambil data'], 403);
             }
 
@@ -123,8 +119,7 @@ class AbsensiController extends Controller
                         ->where('tanggal', $formattedDate)
                         ->first();
 
-        if(!$presence)
-        {
+        if(!$presence) {
             return response()->json(['status' => 'Not yet']);
         }
 
@@ -134,20 +129,15 @@ class AbsensiController extends Controller
     public function getAttendanceStudentStatus(Request $request)
     {
         try {
-            $now = request('current_time');
+            $now = $this->getCurrentTime();
             $dayName = $now->dayName;
-
-            // dd($tanggal);
 
             $presence = Absensi::where('id_user', $request['userId'])
                         ->where('id_kelas_mata_pelajaran', $request['idKelasMataPelajaran'])
                         ->where('tanggal', $now->format('Y-m-d'))
                         ->first();
 
-            // dd($presence);
-
-            if(!$presence)
-            {
+            if(!$presence) {
                 return response()->json(['error' => 'No attendance records for this time'], 403);
             }
 
@@ -163,17 +153,14 @@ class AbsensiController extends Controller
     public function markAttendance(Request $request, $classId)
     {
         try {
-            $attendancesData = $request['attendances']; // Mengambil array yang berisi data kehadiran untuk setiap pengguna
+            $attendancesData = $request['attendances'];
             $idSubject = $request['idMataPelajaran'];
             $idSubjectClass = $request['idKelasMataPelajaran'];
-            $now = Carbon::parse($request['current_time']); // Pastikan menggunakan Carbon untuk parsing tanggal
+            $now = Carbon::parse($request['current_time']);
             $dayName = $now->dayName;
 
             $schedule = Jadwal::where('id_kelas', $classId)
-                // ->where('hari', 'LIKE', '%' . $dayName . '%')
                 ->where('id_mata_pelajaran', $idSubject)
-                // ->where('jam_mulai', '<=', $now->format('H:i:s'))
-                // ->where('jam_akhir', '>=', $now->format('H:i:s'))
                 ->first();
 
             if (!$schedule) {
@@ -210,10 +197,10 @@ class AbsensiController extends Controller
     public function updateAttendance(Request $request, $classId)
     {
         try {
-            $attendancesData = $request['attendances']; // Mengambil array yang berisi data kehadiran untuk setiap pengguna
+            $attendancesData = $request['attendances'];
             $idSubject = $request['idMataPelajaran'];
             $idSubjectClass = $request['idKelasMataPelajaran'];
-            $now = Carbon::parse($request['current_time']); // Pastikan menggunakan Carbon untuk parsing tanggal
+            $now = Carbon::parse($request['current_time']);
             $dayName = $now->dayName;
 
             $schedule = Jadwal::where('id_kelas', $classId)
@@ -266,15 +253,10 @@ class AbsensiController extends Controller
     {
         try {
             $userId = $request['id_user'];
-
             $now = Carbon::parse($request->input('current_time'));
             $dayName = $now->dayName;
 
             $pengajars = JadwalPengajar::where('id_user', $userId)->get();
-            // $pengajars = JadwalPengajar::with(['kelas', 'mataPelajaran'])
-            //                 ->where('id_user', $userId)
-            //                 ->get();
-            
             $jadwals = collect();
             foreach ($pengajars as $pengajar) {
                 $pengajarJadwals = Jadwal::with(['kelas', 'mataPelajaran'])
@@ -329,33 +311,28 @@ class AbsensiController extends Controller
     public function getAbsenSiswa(Request $request)
     {
         try {
-            $now = request('current_time');
+            $now = $this->getCurrentTime();
             $idUser = $request['id_user'];
             $idClass = KelasUser::where('id_user', $idUser)->value('id_kelas');
 
-            // Dapatkan semua jadwal berdasarkan id_kelas dan hari, dan urutkan berdasarkan jam_mulai
             $absen = Jadwal::with('mataPelajaran')
                         ->where('id_kelas', $idClass)
                         ->where('hari', $now->dayName)
-                        ->orderBy('jam_mulai', 'asc') // Mengurutkan berdasarkan jam_mulai secara ascending
+                        ->orderBy('jam_mulai', 'asc')
                         ->get();
 
-            // Dapatkan daftar id_jadwal dari hasil query $absen
-            $idJadwalList = $absen->pluck('id_jadwal'); // Pluck the correct 'id_jadwal' field
+            $idJadwalList = $absen->pluck('id_jadwal');
 
-            // Dapatkan pengajar berdasarkan id_jadwal
             $pengajar = JadwalPengajar::with('user')
                             ->whereIn('id_jadwal', $idJadwalList)
                             ->get()
                             ->groupBy('id_jadwal');
 
-            // Gabungkan data pengajar ke dalam setiap elemen absen
             $absen = $absen->map(function($item) use ($pengajar) {
                 $item->pengajar = $pengajar->get($item->id_jadwal) ?? [];
                 return $item;
             });
 
-            // Kembalikan respons JSON
             return response()->json($absen);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Terjadi kesalahan saat mengambil data absen siswa.', 'message' => $e->getMessage()], 500);
@@ -365,7 +342,7 @@ class AbsensiController extends Controller
     public function getAbsenSiswaStatus(Request $request)
     {
         try {
-            $now = request('current_time');
+            $now = $this->getCurrentTime();
             $idUser = $request['id_user'];
             $idJadwal = $request['id_jadwal'];
             
@@ -386,89 +363,4 @@ class AbsensiController extends Controller
             return response()->json(['error' => 'Terjadi kesalahan saat mengambil status absen siswa.', 'message' => $e->getMessage()], 500);
         }
     }
-
-
-
-
-    // public function markAttendance(Request $request, $classId)
-    // {
-    //     try {
-    //         $userId = $request['userId'];
-    //         $idSubject = $request['idMataPelajaran'];
-    //         $idSubjectClass = $request['idKelasMataPelajaran'];
-
-
-    //         $now = request('current_time');
-    //         $dayName = $now->dayName;
-
-    //         $schedule = Jadwal::where('id_kelas', $classId)
-    //                     ->where('hari', 'LIKE', '%' . $dayName . '%')
-    //                     ->where('id_mata_pelajaran', $idSubject)
-    //                     ->where('jam_mulai', '<=', $now->format('H:i:s'))
-    //                     ->where('jam_akhir', '>=', $now->format('H:i:s'))
-    //                     ->first();
-
-    //         if (!$schedule) {
-    //             return response()->json(['error' => 'Attendance is not allowed at this time'], 403);
-    //         }
-
-    //         $scheduleId = $schedule->id_jadwal;
-
-    //         $attendance = Absensi::create([
-    //             'id_kelas_mata_pelajaran' => $idSubjectClass,
-    //             'id_jadwal' => $scheduleId,
-    //             'id_user' => $userId,
-    //             'status_kehadiran' => $request->status_kehadiran,
-    //             'tanggal' => $now->format('Y-m-d'),
-    //         ]);
-
-    //         return response()->json($attendance);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'An error occurred: ' . $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
-
-    // public function markAttendance(Request $request, $classId)
-    // {
-    //     try {
-    //         $userId = $request['userId'];
-    //         $idSubject = $request['idMataPelajaran'];
-    //         $idSubjectClass = $request['idKelasMataPelajaran'];
-
-
-    //         $now = request('current_time');
-    //         $dayName = $now->dayName;
-
-    //         $schedule = Jadwal::where('id_kelas', $classId)
-    //                     ->where('hari', 'LIKE', '%' . $dayName . '%')
-    //                     ->where('id_mata_pelajaran', $idSubject)
-    //                     ->where('jam_mulai', '<=', $now->format('H:i:s'))
-    //                     ->where('jam_akhir', '>=', $now->format('H:i:s'))
-    //                     ->first();
-
-    //         if (!$schedule) {
-    //             return response()->json(['error' => 'Attendance is not allowed at this time'], 403);
-    //         }
-
-    //         $scheduleId = $schedule->id_jadwal;
-
-    //         $attendance = Absensi::create([
-    //             'id_kelas_mata_pelajaran' => $idSubjectClass,
-    //             'id_jadwal' => $scheduleId,
-    //             'id_user' => $userId,
-    //             'status_kehadiran' => $request->status_kehadiran,
-    //             'tanggal' => $now->format('Y-m-d'),
-    //         ]);
-
-    //         return response()->json($attendance);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'An error occurred: ' . $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
 }

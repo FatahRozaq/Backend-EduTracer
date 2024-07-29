@@ -55,26 +55,25 @@ Route::get('/tugas_kelas_mata_pelajaran/tugas/{id_tugas}', [TugasKelasMataPelaja
 Route::get('/tugas_kelas_mata_pelajaran/kelas/{id_kelas_mata_pelajaran}', [TugasKelasMataPelajaranController::class, 'getTugasByKelasMataPelajaran']);
 
 // Absensi
-Route::middleware([SetTimezone::class])->group(function () {
-    Route::get('/absensi/jadwal/kelas/{classId}', [AbsensiController::class, 'getAvailableSchedules']);
-    Route::get('/absensi/kelas/detail', [AbsensiController::class, 'getAttendance']);
-    Route::post('/mark-attendance/{classId}', [AbsensiController::class, 'markAttendance']);
-    Route::put('/absensi/siswa/update/{classId}', [AbsensiController::class, 'updateAttendance']);
-    Route::get('/absensi/kelas/daftar-user/{classId}', [AbsensiController::class, 'getStudentAvailabeAttendances']);
-    Route::get('/absensi/status/siswa', [AbsensiController::class, 'getAttendanceStudentStatus']);
-    Route::get('/absensi/status/mapel', [AbsensiController::class, 'getAttendanceStatus']);
-    Route::get('/kelas/get', [AbsensiController::class, 'getKelas']);
-    Route::get('/absensi/guru/filter', [AbsensiController::class, 'getFilterAbsensi']);
-    Route::get('/absensi/status/guru', [AbsensiController::class, 'getAbsenStatus']);
-    Route::get('/absensi/get-kelas-mapel', [AbsensiController::class, 'getKelasMapel']);
+Route::get('/absensi/jadwal/kelas/{classId}', [AbsensiController::class, 'getAvailableSchedules']);
+Route::get('/absensi/kelas/detail', [AbsensiController::class, 'getAttendance']);
+Route::post('/mark-attendance/{classId}', [AbsensiController::class, 'markAttendance']);
+Route::put('/absensi/siswa/update/{classId}', [AbsensiController::class, 'updateAttendance']);
+Route::get('/absensi/kelas/daftar-user/{classId}', [AbsensiController::class, 'getStudentAvailabeAttendances']);
+Route::get('/absensi/status/siswa', [AbsensiController::class, 'getAttendanceStudentStatus']);
+Route::get('/absensi/status/mapel', [AbsensiController::class, 'getAttendanceStatus']);
+Route::get('/kelas/get', [AbsensiController::class, 'getKelas']);
+Route::get('/absensi/guru/filter', [AbsensiController::class, 'getFilterAbsensi']);
+Route::get('/absensi/status/guru', [AbsensiController::class, 'getAbsenStatus']);
+Route::get('/absensi/get-kelas-mapel', [AbsensiController::class, 'getKelasMapel']);
 
-    //Siswa
-    Route::get('absensi/siswa/daftar-absen', [AbsensiController::class, 'getAbsenSiswa']);
-    Route::get('absensi/siswa/daftar-absen/status', [AbsensiController::class, 'getAbsenSiswaStatus']);
-});
+// Siswa
+Route::get('absensi/siswa/daftar-absen', [AbsensiController::class, 'getAbsenSiswa']);
+Route::get('absensi/siswa/daftar-absen/status', [AbsensiController::class, 'getAbsenSiswaStatus']);
 
 // Route::get('/classes/{classId}/attendance', [AbsensiController::class, 'getClassAttendance']);
 // Route::get('/students/{studentId}/attendance', [AbsensiController::class, 'getStudentAttendance']);
+
 
 
 //Surat Izin

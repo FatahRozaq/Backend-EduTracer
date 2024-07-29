@@ -50,7 +50,9 @@ Route::get('/guru/tugas/{id}', [TugasController::class, 'show']);
 Route::post('/guru/tugas', [TugasController::class, 'store']);
 Route::put('/guru/tugas/{id}', [TugasController::class, 'update']);
 Route::delete('/guru/tugas/{id}', [TugasController::class, 'destroy']);
-
+Route::get('/tugas/kelas_mata_pelajaran/{id_kelas_mata_pelajaran}', [TugasController::class, 'getTugasByKelasMataPelajaran']);
+Route::get('/tugas_kelas_mata_pelajaran/tugas/{id_tugas}', [TugasKelasMataPelajaranController::class, 'getTugasById']);
+Route::get('/tugas_kelas_mata_pelajaran/kelas/{id_kelas_mata_pelajaran}', [TugasKelasMataPelajaranController::class, 'getTugasByKelasMataPelajaran']);
 
 // Absensi
 Route::middleware([SetTimezone::class])->group(function () {

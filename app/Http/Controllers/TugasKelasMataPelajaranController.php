@@ -5,6 +5,7 @@ use App\Models\TugasKelasMataPelajaran;
 use App\Models\MataPelajaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TugasKelasMataPelajaranController extends Controller
 {
@@ -53,4 +54,54 @@ class TugasKelasMataPelajaranController extends Controller
 
         return response()->json($tugasKelasMataPelajaran, 200);
     }
+
+    public function getTugasById($id_tugas)
+    {
+        try {
+            $tugas = TugasKelasMataPelajaran::where('id_tugas', $id_tugas)
+                ->with(['tugas', 'kelasMataPelajaran', 'user'])
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $tugas,
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tugas not found',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred',
+            ], 500);
+        }
+    }
+
+    public function getTugasByKelasMataPelajaran($id_kelas_mata_pelajaran)
+    {
+        try {
+            $tugas = TugasKelasMataPelajaran::where('id_kelas_mata_pelajaran', $id_kelas_mata_pelajaran)
+                ->with(['tugas', 'kelasMataPelajaran', 'user'])
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $tugas,
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tugas not found',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred',
+            ], 500);
+        }
+    }
+
+
 }

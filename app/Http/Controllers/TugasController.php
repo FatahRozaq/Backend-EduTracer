@@ -132,4 +132,20 @@ class TugasController extends Controller
             ], 500);
         }
     }
+
+    public function getTugasByKelasMataPelajaran($id_kelas_mata_pelajaran)
+    {
+        try {
+            $tugas = Tugas::where('id_kelas_mata_pelajaran', $id_kelas_mata_pelajaran)->get();
+            return response()->json([
+                'success' => true,
+                'data' => $tugas,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred',
+            ], 500);
+        }
+    }
 }

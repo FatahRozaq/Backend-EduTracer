@@ -169,6 +169,19 @@ class MataPelajaranController extends Controller
         return response()->json($mataPelajaran, 200);
     }
 
+    public function getMataPelajaranByLoggedInPengajarAndClass($id_kelas)
+    {
+        $userId = Auth::id();
+
+        $mataPelajaran = PengajarMapel::where('id_user', $userId)
+                                    ->where('id_kelas', $id_kelas)
+                                    ->with('mataPelajaran')
+                                    ->get()
+                                    ->pluck('mataPelajaran');
+
+        return response()->json($mataPelajaran, 200);
+    }
+
     public function getPengajarByMataPelajaran($id_mata_pelajaran)
     {
         $mataPelajaran = MataPelajaran::findOrFail($id_mata_pelajaran);

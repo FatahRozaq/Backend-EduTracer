@@ -71,7 +71,8 @@ Route::put('tugas/siswa/{id}/nilai-tugas', [TugasSiswaController::class, 'update
 
 Route::get('/tugas/kelas_mata_pelajaran/{id_kelas_mata_pelajaran}', [TugasController::class, 'getTugasByKelasMataPelajaran']);
 Route::get('/tugas_kelas_mata_pelajaran/tugas/{id_tugas}', [TugasKelasMataPelajaranController::class, 'getTugasById']);
-Route::get('/tugas_kelas_mata_pelajaran/kelas/{id_kelas_mata_pelajaran}', [TugasKelasMataPelajaranController::class, 'getTugasByKelasMataPelajaran']);
+Route::get('/tugas/kelas/{id_kelas_mata_pelajaran}', [TugasController::class, 'getTugasByKelasMataPelajaran']);
+Route::get('/tugas-kelas-mata-pelajaran/{id_kelas_mata_pelajaran}/{id_tugas}', [TugasKelasMataPelajaranController::class, 'getTugasByKelasMataPelajaranAndTugas']);
 
 // Absensi
 Route::get('/absensi/jadwal/kelas/{classId}', [AbsensiController::class, 'getAvailableSchedules']);
@@ -114,20 +115,23 @@ Route::middleware('auth:sanctum')->post('/mata-pelajaran/{mataPelajaranId}/penga
 //Kelas
 Route::middleware('auth:sanctum')->post('/kelas/enroll', [KelasController::class, 'enroll']);
 Route::post('/kelas/tambah', [KelasController::class, 'store']);
+
 Route::middleware('auth:sanctum')->delete('/kelas/{id_kelas}', [KelasController::class, 'destroy']);
 Route::middleware('auth:sanctum')->put('/kelas/{id_kelas}', [KelasController::class, 'update']);
+
 Route::middleware('auth:sanctum')->get('/kelas/getkelasuser', [KelasController::class, 'getKelasByUserId']);
 Route::middleware('auth:sanctum')->get('/kelas/pendingKelas', [KelasController::class, 'getKelasPending']);
+
 Route::get('kelas-guru', [KelasController::class, 'getKelasByGuru'])->middleware('auth:sanctum');
 Route::middleware('auth:sanctum')->get('/kelas-siswa', [KelasController::class, 'getKelasBySiswa']);
 Route::middleware('auth:sanctum')->get('/parent-child/kelas-anak', [ParentChildController::class, 'getKelasAnak']);
-
 // Route::get('/kelas/user', [KelasController::class, 'getKelasByUserId']); // gabungan
 
 Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/addMataPelajaran', [KelasController::class, 'addMataPelajaran']);
 Route::middleware('auth:sanctum')->get('/kelas/{id_kelas}/mata-pelajaran', [KelasController::class, 'getMataPelajaran']);
 Route::middleware('auth:sanctum')->delete('/kelas-user/{id_kelas}', [KelasController::class, 'destroyKelasUser']);
 Route::middleware('auth:sanctum')->post('/kelas/search', [KelasController::class, 'searchKelas']);
+
 Route::middleware('auth:sanctum')->get('/kelas/{id_kelas}/guru', [KelasController::class, 'getGuruInClass']);
 Route::middleware('auth:sanctum')->get('/kelas-by-wakel', [KelasController::class, 'getKelasByLoggedInWakel']);
 
@@ -143,6 +147,7 @@ Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/confirm-student', [Ke
 //Mata pelajaran
 Route::middleware('auth:sanctum')->get('/mapel-guru', [MataPelajaranController::class, 'getMataPelajaranByLoggedInUser']);
 Route::middleware('auth:sanctum')->get('/mapel-pengajar', [MataPelajaranController::class, 'getMataPelajaranByLoggedInPengajar']);
+Route::middleware('auth:sanctum')->get('/mata-pelajaran/{id_kelas}/pengajar', [MataPelajaranController::class, 'getMataPelajaranByLoggedInPengajarAndClass']);
 Route::middleware('auth:sanctum')->post('/mapel/{id_kelas}/create', [MataPelajaranController::class, 'storeMataPelajaran']);
 Route::middleware('auth:sanctum')->post('/mapel/create', [MataPelajaranController::class, 'storeMataPelajaranonly']);
 Route::middleware('auth:sanctum')->delete('/kelas/{id_kelas}/mata-pelajaran/{id_mata_pelajaran}', [MataPelajaranController::class, 'destroyKelasMataPelajaran']);
@@ -150,8 +155,10 @@ Route::middleware('auth:sanctum')->get('/mata-pelajaran/search', [MataPelajaranC
 Route::middleware('auth:sanctum')->put('/mata-pelajaran/update/{id_mata_pelajaran}', [MataPelajaranController::class, 'updateMataPelajaran']);
 Route::middleware('auth:sanctum')->delete('/mata-pelajaran/destroy/{id_mata_pelajaran}', [MataPelajaranController::class, 'destroyMataPelajaran']);
 Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/add-mata-pelajaran-by-kode', [KelasController::class, 'addMataPelajaranByKode']);
-Route::middleware('auth:sanctum')->get('/mata-pelajaran/{id_mata_pelajaran}/pengajar', [MataPelajaranController::class, 'getPengajarByMataPelajaran']);
+Route::middleware('auth:sanctum')->get('/pengajar/{id_mata_pelajaran}/mata-pelajaran', [MataPelajaranController::class, 'getPengajarByMataPelajaran']);
 Route::middleware('auth:sanctum')->post('/mata-pelajaran/{mataPelajaranId}/pengajaradd', [MataPelajaranController::class, 'addPengajarToMataPelajaran']);
+Route::get('/kelas-mata-pelajaran/{id_kelas}/{id_mata_pelajaran}', [MataPelajaranController::class, 'getKelasMataPelajaranId']);
+
 
 
 // Route::middleware('auth:sanctum')->get('/tugas-kelas-mata-pelajaran', [TugasKelasMataPelajaranController::class, 'getTugasByUser']);

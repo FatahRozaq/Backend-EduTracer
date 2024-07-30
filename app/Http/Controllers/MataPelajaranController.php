@@ -169,6 +169,19 @@ class MataPelajaranController extends Controller
         return response()->json($mataPelajaran, 200);
     }
 
+    public function getMataPelajaranByLoggedInPengajarAndClass($id_kelas)
+    {
+        $userId = Auth::id();
+
+        $mataPelajaran = PengajarMapel::where('id_user', $userId)
+                                    ->where('id_kelas', $id_kelas)
+                                    ->with('mataPelajaran')
+                                    ->get()
+                                    ->pluck('mataPelajaran');
+
+        return response()->json($mataPelajaran, 200);
+    }
+
     public function getPengajarByMataPelajaran($id_mata_pelajaran)
     {
         $mataPelajaran = MataPelajaran::findOrFail($id_mata_pelajaran);
@@ -238,6 +251,32 @@ class MataPelajaranController extends Controller
         ]);
 
         return response()->json(['message' => 'Pengajar added successfully'], 201);
+    }
+
+    public function getKelasMataPelajaranId($id_kelas, $id_mata_pelajaran)
+    {
+        try {
+            $kelasMataPelajaran = KelasMataPelajaran::where('id_kelas', $id_kelas)
+                                                    ->where('id_mata_pelajaran', $id_mata_pelajaran)
+                                                    ->first();
+
+            if ($kelasMataPelajaran) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $kelasMataPelajaran->id_kelas_mata_pelajaran,
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'KelasMataPelajaran not found.',
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred',
+            ], 500);
+        }
     }
 
 

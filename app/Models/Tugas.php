@@ -16,5 +16,12 @@ class Tugas extends Model
         'deskripsi',
         'tenggat_tugas',
         'status',
+        'id_kelas_mata_pelajaran',
+        'file_tugas'
     ];
+
+    public function KelasMataPelajaran()
+    {
+        return $this->belongsTo(KelasMataPelajaran::class, 'id_kelas_mata_pelajaran');
+    }
 }

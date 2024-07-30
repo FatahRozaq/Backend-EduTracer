@@ -44,12 +44,21 @@ Route::middleware('auth:sanctum')->delete('/jadwal/{id}', [JadwalController::cla
 Route::get('jadwal-pengajar', [JadwalPengajarController::class, 'getJadwalPengajar']);
 
 
-//tugas
+
+//Tugas Legacy
 Route::get('/guru/tugas', [TugasController::class, 'index']);
 Route::get('/guru/tugas/{id}', [TugasController::class, 'show']);
-Route::post('/guru/tugas', [TugasController::class, 'store']);
 Route::put('/guru/tugas/{id}', [TugasController::class, 'update']);
 Route::delete('/guru/tugas/{id}', [TugasController::class, 'destroy']);
+Route::post('/guru/tugas', [TugasController::class, 'store']);
+
+// Kelompok Tugas
+Route::get('/guru/tugas/detail/{id}', [TugasController::class, 'getTugasByDetail']);
+Route::post('/guru/tugas/kelompok-tugas', [TugasController::class, 'storeKelompokTugas']);
+Route::post('/guru/tugas/tambah-kelas/{id_tugas}', [TugasController::class, 'storeAdditionalData']);
+Route::put('/guru/tugas/nama-tugas/{nama_tugas}', [TugasController::class, 'editTugasByNama']);
+Route::delete('/guru/tugas/delete/{nama_tugas}', [TugasController::class, 'deleteTugasByNama']);
+
 Route::get('/tugas/kelas_mata_pelajaran/{id_kelas_mata_pelajaran}', [TugasController::class, 'getTugasByKelasMataPelajaran']);
 Route::get('/tugas_kelas_mata_pelajaran/tugas/{id_tugas}', [TugasKelasMataPelajaranController::class, 'getTugasById']);
 Route::get('/tugas_kelas_mata_pelajaran/kelas/{id_kelas_mata_pelajaran}', [TugasKelasMataPelajaranController::class, 'getTugasByKelasMataPelajaran']);

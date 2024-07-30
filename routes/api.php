@@ -2,21 +2,22 @@
 
 use Illuminate\Http\Request;
 use App\Http\Middleware\SetTimezone;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\SuratIzinController;
-use App\Http\Controllers\KelasController;
-use App\Http\Controllers\TugasController;
-use App\Http\Controllers\AbsensiController;
-use App\Http\Controllers\JadwalController;
-use App\Http\Controllers\JadwalPengajarController;
-
-use App\Http\Controllers\ParentChildController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\MataPelajaranController;
-use App\Http\Controllers\TugasKelasMataPelajaranController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\KelasController;
 use App\Http\Controllers\RapotController;
+use App\Http\Controllers\TugasController;
+use App\Http\Controllers\JadwalController;
+
+use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\SuratIzinController;
+use App\Http\Controllers\TugasSiswaController;
+use App\Http\Controllers\ParentChildController;
+use App\Http\Controllers\MataPelajaranController;
+use App\Http\Controllers\JadwalPengajarController;
+use App\Http\Controllers\TugasKelasMataPelajaranController;
 
 
 // Route::get('/user', function (Request $request) {
@@ -58,6 +59,15 @@ Route::post('/guru/tugas/kelompok-tugas', [TugasController::class, 'storeKelompo
 Route::post('/guru/tugas/tambah-kelas/{id_tugas}', [TugasController::class, 'storeAdditionalData']);
 Route::put('/guru/tugas/nama-tugas/{nama_tugas}', [TugasController::class, 'editTugasByNama']);
 Route::delete('/guru/tugas/delete/{nama_tugas}', [TugasController::class, 'deleteTugasByNama']);
+
+// Pengumpulan Tugas Siswa
+Route::get('tugas/siswa', [TugasSiswaController::class, 'index']);
+Route::get('tugas/siswa/{id}', [TugasSiswaController::class, 'show']);
+Route::post('tugas/siswa', [TugasSiswaController::class, 'store']);
+Route::put('tugas/siswa/{id}', [TugasSiswaController::class, 'update']);
+Route::delete('tugas/siswa/{id}', [TugasSiswaController::class, 'destroy']);
+Route::put('tugas/siswa/{id}/nilai-tugas', [TugasSiswaController::class, 'updateNilaiTugas']);
+
 
 Route::get('/tugas/kelas_mata_pelajaran/{id_kelas_mata_pelajaran}', [TugasController::class, 'getTugasByKelasMataPelajaran']);
 Route::get('/tugas_kelas_mata_pelajaran/tugas/{id_tugas}', [TugasKelasMataPelajaranController::class, 'getTugasById']);

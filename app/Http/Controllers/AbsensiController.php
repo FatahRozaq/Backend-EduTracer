@@ -249,31 +249,58 @@ class AbsensiController extends Controller
         }
     }
 
+    // public function getFilterAbsensi(Request $request)
+    // {
+    //     try {
+    //         $userId = $request['id_user'];
+    //         $now = Carbon::parse($request->input('current_time'));
+    //         $dayName = $now->dayName;
+
+    //         $pengajars = JadwalPengajar::where('id_user', $userId)->get();
+    //         $jadwals = collect();
+    //         foreach ($pengajars as $pengajar) {
+    //             $pengajarJadwals = Jadwal::with(['kelas', 'mataPelajaran'])
+    //                                     ->where('id_jadwal', $pengajar->id_jadwal)
+    //                                     ->get()
+    //                                     ->filter(function($jadwal) use ($dayName) {
+    //                                         return in_array($dayName, $jadwal->hari);
+    //                                     });
+    //             $jadwals = $jadwals->merge($pengajarJadwals);
+    //         }
+
+    //         return response()->json($jadwals);
+    //     } catch (Exception $e) {
+    //         return response()->json(['error' => 'Terjadi kesalahan server. Silakan coba kembali' . $e->getMessage()], 500);
+    //     }
+    // }
+
     public function getFilterAbsensi(Request $request)
-    {
-        try {
-            $userId = $request['id_user'];
-            $now = Carbon::parse($request->input('current_time'));
-            $dayName = $now->dayName;
+{
+    try {
+        $userId = (int)$request['id_user'];
+        $now = Carbon::parse($request->input('current_time'));
+        $dayName = $now->dayName;
 
-            $pengajars = JadwalPengajar::where('id_user', $userId)->get();
-            $jadwals = collect();
-            foreach ($pengajars as $pengajar) {
-                $pengajarJadwals = Jadwal::with(['kelas', 'mataPelajaran'])
-                                        ->where('id_jadwal', $pengajar->id_jadwal)
-                                        ->get()
-                                        ->filter(function($jadwal) use ($dayName) {
-                                            return in_array($dayName, $jadwal->hari);
-                                        });
-                $jadwals = $jadwals->merge($pengajarJadwals);
-            }
+        $pengajars = JadwalPengajar::where('id_user', $userId)->get();
+        $jadwals = collect();
 
-            return response()->json($jadwals);
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Terjadi kesalahan server. Silakan coba kembali' . $e->getMessage()], 500);
+        foreach ($pengajars as $pengajar) {
+            $pengajarJadwals = Jadwal::with(['kelas', 'mataPelajaran'])
+                ->where('id_jadwal', (int)$pengajar->id_jadwal)
+                ->get()
+                ->filter(function ($jadwal) use ($dayName) {
+                    $hariArray = explode(',', $jadwal->hari);
+                    return in_array($dayName, $hariArray);
+                });
+
+            $jadwals = $jadwals->merge($pengajarJadwals);
         }
-    }
 
+        return response()->json($jadwals);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Terjadi kesalahan server. Silakan coba kembali. Error: ' . $e->getMessage()], 500);
+    }
+}
     public function getAbsenStatus(Request $request)
     {
         try {

@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tugas;
+use App\Models\KelasUser;
 use Illuminate\Http\Request;
+use App\Models\PengajarMapel;
+use App\Models\KelasMataPelajaran;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TugasController extends Controller
@@ -46,37 +49,61 @@ class TugasController extends Controller
     }
 
     public function store(Request $request)
-    {
-        // $idKelas = $request['id_kelas'];
-        // $idMapel = $request['id_mata_pelajaran'];
-        // $idKelasMapel = $request['id_kelas_mata_pelajaran'];
-        try {
-            $validatedData = $request->validate([
-                'nama_tugas' => 'required',
-                'deskripsi' => 'required',
-                'status' => 'required',
-                'tenggat_tugas' => 'required',
-                'id_kelas_mata_pelajaran' => 'required',
-                'file_tugas' => 'nullable|file|max:4096'
-            ]);
+{
+    try {
+        // Ambil id_kelas dan id_mata_pelajaran dari request
+        $idKelas = $request['id_kelas'];
+        $idMapel = $request['id_mata_pelajaran'];
 
-            $tugas = Tugas::create($validatedData);
-            return response()->json([
-                'success' => true,
-                'data' => $tugas,
-            ], 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->errors(),
-            ], 422);
-        } catch (\Exception $e) {
+        // Cari id_kelas_mata_pelajaran dari KelasMataPelajaran
+        $kelasMapel = KelasMataPelajaran::where('id_kelas', $idKelas)
+                                        ->where('id_mata_pelajaran', $idMapel)
+                                        ->first();
+
+        // Periksa apakah kelasMapel ditemukan
+        if (!$kelasMapel) {
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred',
-            ], 500);
+                'message' => 'Kelas Mata Pelajaran tidak ditemukan.',
+            ], 404);
         }
+
+        // Validasi data request
+        $validatedData = $request->validate([
+            'nama_tugas' => 'required',
+            'deskripsi' => 'required',
+            'status' => 'required',
+            'tenggat_tugas' => 'required|date',
+            'file' => 'nullable|file|max:4096'
+        ]);
+
+        // Tambahkan id_kelas_mata_pelajaran ke dalam data yang divalidasi
+        $validatedData['id_kelas_mata_pelajaran'] = $kelasMapel->id_kelas_mata_pelajaran;
+
+        // Buat entri tugas baru
+        $tugas = Tugas::create($validatedData);
+
+        // Kembalikan respons sukses
+        return response()->json([
+            'success' => true,
+            'data' => $tugas,
+        ], 201);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        // Kembalikan respons kesalahan validasi
+        return response()->json([
+            'success' => false,
+            'message' => $e->errors(),
+        ], 422);
+    } catch (\Exception $e) {
+        // Kembalikan respons kesalahan umum
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
 
     public function update(Request $request, $id)
@@ -366,6 +393,101 @@ class TugasController extends Controller
             ], 500);
         }
     }
+
+    public function getMapelGuru(Request $request)
+    {
+        try {
+            $userId = $request->input('userId');
+            
+            // Ambil data mapel yang diajar oleh guru
+            $mapelGuru = PengajarMapel::with('mataPelajaran')
+                            ->where('id_user', $userId)
+                            ->get();
+
+            // Return response dengan data mapel guru dan kelas mata pelajaran
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'mapelGuru' => $mapelGuru
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            // Handle errors
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getKelasGuru(Request $request)
+    {
+        try {
+            $userId = $request->input('userId');
+            
+            $kelas = KelasUser::with('kelas')
+                            ->where('id_user', $userId)
+                            ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'kelas' => $kelas
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+//     public function getMapelGuru(Request $request)
+// {
+//     try {
+//         $userId = $request->input('userId');
+        
+//         // Ambil data mapel yang diajar oleh guru
+//         $mapelGuru = PengajarMapel::where('id_user', $userId)->get();
+
+//         // Menyimpan hasil pencarian kelas mata pelajaran
+//         $kelasMataPelajaranList = [];
+
+//         foreach ($mapelGuru as $mapel) {
+//             // Query untuk mendapatkan semua KelasMataPelajaran berdasarkan id_mata_pelajaran dan id_kelas
+//             $kelasMataPelajaran = KelasMataPelajaran::where('id_mata_pelajaran', $mapel->id_mata_pelajaran)
+//                                                      ->where('id_kelas', $mapel->id_kelas)
+//                                                      ->get();
+            
+//             // Gabungkan hasil ke dalam list
+//             if (!$kelasMataPelajaran->isEmpty()) {
+//                 $kelasMataPelajaranList = array_merge($kelasMataPelajaranList, $kelasMataPelajaran->toArray());
+//             }
+//         }
+
+//         // Return response dengan data mapel guru dan kelas mata pelajaran
+//         return response()->json([
+//             'success' => true,
+//             'data' => [
+//                 'mapelGuru' => $mapelGuru,
+//                 'kelasMataPelajaran' => $kelasMataPelajaranList
+//             ]
+//         ], 200);
+
+//     } catch (\Exception $e) {
+//         // Handle errors
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Terjadi kesalahan saat mengambil data.',
+//             'error' => $e->getMessage()
+//         ], 500);
+//     }
+// }
 
 
 

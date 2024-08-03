@@ -20,6 +20,11 @@ class Tugas extends Model
         'file'
     ];
 
+    protected $casts = [
+        'id_tugas' => 'integer',
+        'id_kelas_mata_pelajaran' => 'integer'
+    ];
+
     public function KelasMataPelajaran()
     {
         return $this->belongsTo(KelasMataPelajaran::class, 'id_kelas_mata_pelajaran');

@@ -18,6 +18,13 @@ class PengajarMapel extends Model
         'id_kelas',
     ];
 
+    protected $casts = [
+        'id_pengajar_mapel' => 'integer',
+        'id_mata_pelajaran' => 'integer',
+        'id_user' => 'integer',
+        'id_kelas' => 'integer'
+    ];
+
     public function mataPelajaran()
     {
         return $this->belongsTo(MataPelajaran::class, 'id_mata_pelajaran');

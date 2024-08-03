@@ -16,6 +16,13 @@ class Absensi extends Model
         'id_kelas_mata_pelajaran', 'id_jadwal', 'id_user', 'status_kehadiran', 'tanggal'
     ];
 
+    protected $casts = [
+        'id_absen' => 'integer',
+        'id_kelas_mata_pelajaran' => 'integer',
+        'id_jadwal' => 'integer',
+        'id_user' => 'integer',
+    ];
+
     
     public function kelasMataPelajaran()
     {

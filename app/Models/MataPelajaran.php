@@ -18,6 +18,11 @@ class MataPelajaran extends Model
         'deskripsi',
         'id_user'
     ];
+
+    protected $casts = [
+        'id_mata_pelajaran' => 'integer',
+        'id_user' => 'integer',
+    ];
      
     public function kelas()
     {

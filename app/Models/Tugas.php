@@ -17,7 +17,7 @@ class Tugas extends Model
         'tenggat_tugas',
         'status',
         'id_kelas_mata_pelajaran',
-        'file_tugas'
+        'file'
     ];
 
     public function KelasMataPelajaran()

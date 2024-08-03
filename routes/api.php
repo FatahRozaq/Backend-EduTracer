@@ -48,6 +48,8 @@ Route::get('jadwal-pengajar', [JadwalPengajarController::class, 'getJadwalPengaj
 
 //Tugas Legacy
 Route::get('/guru/tugas', [TugasController::class, 'index']);
+Route::get('/guru/tugas/get-mapel', [TugasController::class, 'getMapelGuru']);
+Route::get('/guru/tugas/get-kelas', [TugasController::class, 'getKelasGuru']);
 Route::get('/guru/tugas/{id}', [TugasController::class, 'show']);
 Route::put('/guru/tugas/{id}', [TugasController::class, 'update']);
 Route::delete('/guru/tugas/{id}', [TugasController::class, 'destroy']);

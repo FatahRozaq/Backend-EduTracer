@@ -19,6 +19,10 @@ class Kelas extends Model
         'enrollment_key'
     ];
 
+    protected $casts = [
+        'id_kelas' => 'integer',
+    ];
+
     public function mataPelajaran()
     {
         return $this->belongsToMany(MataPelajaran::class, 'kelas_mata_pelajaran', 'id_kelas', 'id_mata_pelajaran')

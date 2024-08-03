@@ -20,6 +20,12 @@ class Jadwal extends Model
         'jam_akhir',
     ];
 
+    protected $casts = [
+        'id_jadwal' => 'integer',
+        'id_kelas' => 'integer',
+        'id_mata_pelajaran' => 'integer',
+    ];
+
     public function kelas()
     {
         return $this->belongsTo(Kelas::class, 'id_kelas');

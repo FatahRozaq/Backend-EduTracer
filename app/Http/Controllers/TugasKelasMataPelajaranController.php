@@ -123,5 +123,36 @@ class TugasKelasMataPelajaranController extends Controller
         }
     }
 
+    public function getTugasByKelasMataPelajaranAndUser($id_kelas_mata_pelajaran)
+    {
+        try {
+            $user = Auth::user();
+            $userId = Auth::id();
+
+            $tugas = TugasKelasMataPelajaran::where('id_kelas_mata_pelajaran', $id_kelas_mata_pelajaran)
+                ->where('id_user', $user->id)
+                // ->with(['tugas', 'kelasMataPelajaran', 'user'])
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'user' => $userId,
+                'data' => $tugas,
+                
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tugas not found',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred',
+            ], 500);
+        }
+    }
+
+
 
 }

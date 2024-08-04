@@ -22,10 +22,10 @@ class TugasKelasMataPelajaran extends Model
     ];
 
     protected $casts = [
+        'id_tugas_kelas_mata_pelajaran' => 'integer',
         'id_tugas' => 'integer',
         'id_kelas_mata_pelajaran' => 'integer',
         'id_user' => 'integer',
-        'id_tugas_kelas_mata_pelajaran' => 'integer',
         'nilai_tugas' => 'integer'
     ];
 

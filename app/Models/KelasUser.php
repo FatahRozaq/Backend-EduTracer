@@ -19,9 +19,9 @@ class KelasUser extends Model
     ];
 
     protected $casts = [
-        'id_kelas' => 'integer',
-        'id_user' => 'integer',
         'id_kelas_user' => 'integer',
+        'id_user' => 'integer',
+        'id_kelas' => 'integer',
     ];
 
     public function user()

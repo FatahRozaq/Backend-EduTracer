@@ -18,6 +18,7 @@ class JadwalPengajar extends Model
     ];
 
     protected $casts = [
+        'id_jadwal_pengajar' => 'integer',
         'id_jadwal' => 'integer',
         'id_user' => 'integer',
     ];

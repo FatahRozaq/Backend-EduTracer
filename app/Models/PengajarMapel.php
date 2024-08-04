@@ -19,10 +19,10 @@ class PengajarMapel extends Model
     ];
 
     protected $casts = [
-        'id_kelas' => 'integer',
+        'id_pengajar_mapel' => 'integer',
         'id_mata_pelajaran' => 'integer',
         'id_user' => 'integer',
-        'id_pengajar_mapel' => 'integer',
+        'id_kelas' => 'integer'
     ];
 
     public function mataPelajaran()

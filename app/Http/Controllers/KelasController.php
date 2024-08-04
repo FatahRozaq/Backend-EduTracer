@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
+use App\Models\User;
 use App\Models\Kelas;
 use App\Models\KelasUser;
-use App\Models\KelasMataPelajaran;
+use Illuminate\Http\Request;
 use App\Models\MataPelajaran;
+use App\Models\KelasMataPelajaran;
+use Illuminate\Support\Facades\Auth;
 
 class KelasController extends Controller
 {
@@ -89,11 +90,29 @@ class KelasController extends Controller
         return response()->json($kelasList);
     }
 
+    // public function getKelasByUserId(Request $request)
+    // {
+    //     $user = Auth::user();
+
+    //     $kelas = $user->kelas()->get();
+
+    //     return response()->json($kelas, 200);
+    // }
+
     public function getKelasByUserId(Request $request)
     {
-        $user = Auth::user();
+        // Mendapatkan user yang terautentikasi
+        // $user = Auth::user();
+        $user = User::where('id', 1)
+                ->get();
 
-        $kelas = $user->kelas()->wherePivot('status', 'Confirm')->get();
+        // Pastikan user terautentikasi
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Mengambil data kelas yang terkait dengan user yang terautentikasi
+        $kelas = KelasUser::where('id_user', 1);
 
         return response()->json($kelas, 200);
     }

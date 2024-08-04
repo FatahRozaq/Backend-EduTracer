@@ -6,6 +6,7 @@ use App\Models\MataPelajaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log; 
 
 class TugasKelasMataPelajaranController extends Controller
 {
@@ -105,6 +106,7 @@ class TugasKelasMataPelajaranController extends Controller
 
     public function getTugasByKelasMataPelajaranAndTugas($id_kelas_mata_pelajaran, $id_tugas)
     {
+        $user = Auth::user();
         try {
             $tugas = TugasKelasMataPelajaran::where('id_kelas_mata_pelajaran', $id_kelas_mata_pelajaran)
                                             ->where('id_tugas', $id_tugas)
@@ -123,22 +125,51 @@ class TugasKelasMataPelajaranController extends Controller
         }
     }
 
-    public function getTugasByKelasMataPelajaranAndUser($id_kelas_mata_pelajaran)
+    // public function getTugasByKelasMataPelajaranAndUser($id_kelas_mata_pelajaran)
+    // {
+    //     try {
+    //         $user = Auth::user();
+    //         $userId = Auth::id();
+    //         if (!$user) {
+    //             return response()->json(['error' => 'Unauthorized'], 401);
+    //         }
+
+    //         $tugas = TugasKelasMataPelajaran::where('id_kelas_mata_pelajaran', $id_kelas_mata_pelajaran)
+    //             ->where('id_user', $user->id)
+    //             ->with(['tugas', 'kelasMataPelajaran', 'user'])
+    //             ->get();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'user' => $user->id,
+    //             'data' => $tugas,
+                
+    //         ], 200);
+    //     } catch (ModelNotFoundException $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Tugas not found',
+    //         ], 404);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'An error occurred',
+                
+    //         ], 500);
+    //     }
+    // }
+
+    public function getTugasByKelasMataPelajaranAndUser($id_kelas_mata_pelajaran, $id_user)
     {
         try {
-            $user = Auth::user();
-            $userId = Auth::id();
-
             $tugas = TugasKelasMataPelajaran::where('id_kelas_mata_pelajaran', $id_kelas_mata_pelajaran)
-                ->where('id_user', $user->id)
-                // ->with(['tugas', 'kelasMataPelajaran', 'user'])
+                ->where('id_user', $id_user)
+                ->with(['tugas', 'kelasMataPelajaran', 'user'])
                 ->get();
 
             return response()->json([
                 'success' => true,
-                'user' => $userId,
                 'data' => $tugas,
-                
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json([
@@ -146,6 +177,7 @@ class TugasKelasMataPelajaranController extends Controller
                 'message' => 'Tugas not found',
             ], 404);
         } catch (\Exception $e) {
+            Log::error('Error fetching Tugas: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred',

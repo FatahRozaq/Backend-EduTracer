@@ -21,6 +21,14 @@ class TugasKelasMataPelajaran extends Model
         'nilai_tugas'
     ];
 
+    protected $casts = [
+        'id_tugas' => 'integer',
+        'id_kelas_mata_pelajaran' => 'integer',
+        'id_user' => 'integer',
+        'id_tugas_kelas_mata_pelajaran' => 'integer',
+        'nilai_tugas' => 'integer'
+    ];
+
     public function tugas()
     {
         return $this->belongsTo(Tugas::class, 'id_tugas');

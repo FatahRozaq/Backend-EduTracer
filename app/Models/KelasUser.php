@@ -18,6 +18,12 @@ class KelasUser extends Model
         'status',
     ];
 
+    protected $casts = [
+        'id_kelas' => 'integer',
+        'id_user' => 'integer',
+        'id_kelas_user' => 'integer',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');

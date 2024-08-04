@@ -74,8 +74,9 @@ Route::put('tugas/siswa/{id}/nilai-tugas', [TugasSiswaController::class, 'update
 Route::get('/tugas/kelas_mata_pelajaran/{id_kelas_mata_pelajaran}', [TugasController::class, 'getTugasByKelasMataPelajaran']);
 Route::get('/tugas_kelas_mata_pelajaran/tugas/{id_tugas}', [TugasKelasMataPelajaranController::class, 'getTugasById']);
 Route::get('/tugas/kelas/{id_kelas_mata_pelajaran}', [TugasController::class, 'getTugasByKelasMataPelajaran']);
+// Route::get('/tugas-kelas-mata-pelajaran/user/{id_kelas_mata_pelajaran}', [TugasKelasMataPelajaranController::class, 'getTugasByKelasMataPelajaranAndUser']);
 Route::get('/tugas-kelas-mata-pelajaran/{id_kelas_mata_pelajaran}/{id_tugas}', [TugasKelasMataPelajaranController::class, 'getTugasByKelasMataPelajaranAndTugas']);
-Route::middleware('auth:sanctum')->get('/tugas-kelas-mata-pelajaran/{id_kelas_mata_pelajaran}/user', [TugasKelasMataPelajaranController::class, 'getTugasByKelasMataPelajaranAndUser']);
+Route::get('/tugas-kelas-mata-pelajaran/{id_kelas_mata_pelajaran}/user/{id_user}', [TugasKelasMataPelajaranController::class, 'getTugasByKelasMataPelajaranAndUser']);
 
 
 // Absensi
@@ -158,8 +159,9 @@ Route::middleware('auth:sanctum')->put('/mata-pelajaran/update/{id_mata_pelajara
 Route::middleware('auth:sanctum')->delete('/mata-pelajaran/destroy/{id_mata_pelajaran}', [MataPelajaranController::class, 'destroyMataPelajaran']);
 Route::middleware('auth:sanctum')->post('/kelas/{id_kelas}/add-mata-pelajaran-by-kode', [KelasController::class, 'addMataPelajaranByKode']);
 Route::middleware('auth:sanctum')->get('/pengajar/{id_mata_pelajaran}/mata-pelajaran', [MataPelajaranController::class, 'getPengajarByMataPelajaran']);
-Route::middleware('auth:sanctum')->post('/mata-pelajaran/{mataPelajaranId}/pengajaradd', [MataPelajaranController::class, 'addPengajarToMataPelajaran']);
+Route::post('/mata-pelajaran/{mataPelajaranId}/pengajaradd', [MataPelajaranController::class, 'addPengajarToMataPelajaran']);
 Route::get('/kelas-mata-pelajaran/{id_kelas}/{id_mata_pelajaran}', [MataPelajaranController::class, 'getKelasMataPelajaranId']);
+
 
 
 

@@ -17,6 +17,11 @@ class Rapot extends Model
         'id_kelas',
         'semester',
     ];
+    protected $casts = [
+        'id_siswa' => 'integer',
+        'id_kelas' => 'integer',
+        'id' => 'integer',
+    ];
 
     public function siswa()
     {

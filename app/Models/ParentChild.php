@@ -10,6 +10,12 @@ class ParentChild extends Model
 
     protected $table = 'parent_child';
 
+    protected $casts = [
+        'child_id' => 'integer',
+        'parent_id' => 'integer',
+        'id' => 'integer',
+    ];
+
     public function child()
     {
         return $this->belongsTo(User::class, 'child_id');

@@ -17,6 +17,11 @@ class JadwalPengajar extends Model
         'id_user',
     ];
 
+    protected $casts = [
+        'id_jadwal' => 'integer',
+        'id_user' => 'integer',
+    ];
+
     public function jadwal()
     {
         return $this->belongsTo(Jadwal::class, 'id_jadwal');

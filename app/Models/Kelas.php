@@ -16,11 +16,13 @@ class Kelas extends Model
     protected $fillable = [
         'nama_kelas',
         'deskripsi',
-        'enrollment_key'
+        'enrollment_key',
+        'wakel_id'
     ];
 
     protected $casts = [
         'id_kelas' => 'integer',
+        'wakel_id' => 'integer'
     ];
 
     public function mataPelajaran()

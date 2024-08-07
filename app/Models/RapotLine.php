@@ -18,6 +18,12 @@ class RapotLine extends Model
         'notes',
     ];
 
+    protected $casts = [
+        'id' => 'integer',
+        'id_rapot' => 'integer',
+        'id_mapel' => 'integer',
+    ];
+
     public function rapot()
     {
         return $this->belongsTo(Rapot::class, 'id_rapot');

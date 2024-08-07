@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Models\MataPelajaran;
 use App\Models\JadwalPengajar;
 use App\Models\KelasMataPelajaran;
+use App\Models\ParentChild;
 
 class AbsensiController extends Controller
 {
@@ -338,8 +339,17 @@ class AbsensiController extends Controller
     public function getAbsenSiswa(Request $request)
     {
         try {
-            $now = $this->getCurrentTime();
             $idUser = $request['id_user'];
+
+            $partner = ParentChild::where('parent_id', $idUser)->first();
+
+            if($partner)
+            {
+                $idUser = $partner->child_id;
+            }
+            
+            $now = $this->getCurrentTime();
+            // $idUser = $request['id_user'];
             $idClass = KelasUser::where('id_user', $idUser)->value('id_kelas');
 
             $absen = Jadwal::with('mataPelajaran')
@@ -369,8 +379,17 @@ class AbsensiController extends Controller
     public function getAbsenSiswaStatus(Request $request)
     {
         try {
-            $now = $this->getCurrentTime();
             $idUser = $request['id_user'];
+
+            $partner = ParentChild::where('parent_id', $idUser)->first();
+
+            if($partner)
+            {
+                $idUser = $partner->child_id;
+            }
+
+            $now = $this->getCurrentTime();
+            // $idUser = $request['id_user'];
             $idJadwal = $request['id_jadwal'];
             
             $status = Absensi::where('id_user', $idUser)

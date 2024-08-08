@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tugas;
+use Carbon\Carbon;
 use App\Models\KelasUser;
 use Illuminate\Http\Request;
 use App\Models\PengajarMapel;
@@ -11,6 +12,16 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TugasController extends Controller
 {
+    public function __construct()
+    {
+        Carbon::setLocale('id');
+    }
+
+    private function getCurrentTime()
+    {
+        return Carbon::now('Asia/Jakarta');
+    }
+
     public function index()
     {
         try {
@@ -48,7 +59,64 @@ class TugasController extends Controller
         }
     }
 
-    public function store(Request $request)
+//     public function store(Request $request)
+// {
+//     try {
+//         // Ambil id_kelas dan id_mata_pelajaran dari request
+//         $idKelas = $request['id_kelas'];
+//         $idMapel = $request['id_mata_pelajaran'];
+
+//         // Cari id_kelas_mata_pelajaran dari KelasMataPelajaran
+//         $kelasMapel = KelasMataPelajaran::where('id_kelas', $idKelas)
+//                                         ->where('id_mata_pelajaran', $idMapel)
+//                                         ->first();
+
+//         // Periksa apakah kelasMapel ditemukan
+//         if (!$kelasMapel) {
+//             return response()->json([
+//                 'success' => false,
+//                 'message' => 'Kelas Mata Pelajaran tidak ditemukan.',
+//             ], 404);
+//         }
+
+//         // Validasi data request
+//         $validatedData = $request->validate([
+//             'nama_tugas' => 'required',
+//             'deskripsi' => 'required',
+//             'status' => 'required',
+//             'tenggat_tugas' => 'required|date',
+//             'file' => 'nullable|file|max:4096'
+//         ]);
+
+//         // Tambahkan id_kelas_mata_pelajaran ke dalam data yang divalidasi
+//         $validatedData['id_kelas_mata_pelajaran'] = $kelasMapel->id_kelas_mata_pelajaran;
+
+//         // Buat entri tugas baru
+//         $tugas = Tugas::create($validatedData);
+
+//         // Kembalikan respons sukses
+//         return response()->json([
+//             'success' => true,
+//             'data' => $tugas,
+//         ], 201);
+
+//     } catch (\Illuminate\Validation\ValidationException $e) {
+//         // Kembalikan respons kesalahan validasi
+//         return response()->json([
+//             'success' => false,
+//             'message' => $e->errors(),
+//         ], 422);
+//     } catch (\Exception $e) {
+//         // Kembalikan respons kesalahan umum
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'An error occurred',
+//             'error' => $e->getMessage()
+//         ], 500);
+//     }
+// }
+
+public function store(Request $request)
 {
     try {
         // Ambil id_kelas dan id_mata_pelajaran dari request
@@ -72,13 +140,63 @@ class TugasController extends Controller
         $validatedData = $request->validate([
             'nama_tugas' => 'required',
             'deskripsi' => 'required',
-            'status' => 'required',
             'tenggat_tugas' => 'required|date',
-            'file' => 'nullable|file|max:4096'
+            'file' => 'nullable|file|max:4096|mimes:jpg,jpeg,png,pdf,doc,docx'
         ]);
+
+        // Get the current date and time
+        $now = $this->getCurrentTime();
+
+        // Parse tenggat_tugas to a Carbon instance
+        $tenggatTugas = Carbon::parse($validatedData['tenggat_tugas'], 'Asia/Jakarta');
+
+        // Get start of the week for both the current time and deadline
+        $startOfWeekNow = $now->copy()->startOfWeek();
+        $endOfWeekNow = $now->copy()->endOfWeek();
+        $startOfNextWeek = $startOfWeekNow->copy()->addWeek();
+        $endOfNextWeek = $endOfWeekNow->copy()->addWeek();
+        $endOfMonthNow = $now->copy()->endOfMonth();
+
+        // Determine the status based on the deadline
+        if ($tenggatTugas->isToday()) {
+            $status = 'Hari ini';
+        } elseif ($tenggatTugas->isTomorrow()) {
+            $status = 'Besok';
+        } elseif ($tenggatTugas->between($startOfWeekNow, $endOfWeekNow)) {
+            $status = 'Minggu ini';
+        } elseif ($tenggatTugas->between($startOfNextWeek, $endOfNextWeek)) {
+            $status = 'Minggu depan';
+        } elseif ($tenggatTugas->month == $now->month) {
+            $status = 'Bulan ini';
+        } else {
+            $status = 'Di luar bulan ini';
+        }
+
+        // Tambahkan status ke dalam data yang divalidasi
+        $validatedData['status'] = $status;
 
         // Tambahkan id_kelas_mata_pelajaran ke dalam data yang divalidasi
         $validatedData['id_kelas_mata_pelajaran'] = $kelasMapel->id_kelas_mata_pelajaran;
+
+        // Handle file upload
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+        
+            // Ensure a valid uploaded file
+            if ($file->isValid()) {
+                // Generate a unique filename using timestamp and original name
+                $filename = time() . '_' . $file->getClientOriginalName();
+        
+                // Store the file in the 'uploads/tugas' directory within the 'public' disk
+                $path = $file->storeAs('uploads/tugas', $filename, 'public');
+                
+                // Add the file path to validated data
+                $validatedData['file_path'] = $path;
+                // return response()->json($validatedData['file_path']);
+            }
+        } else {
+            return response()->json($idKelas);
+        }
 
         // Buat entri tugas baru
         $tugas = Tugas::create($validatedData);
@@ -104,6 +222,7 @@ class TugasController extends Controller
         ], 500);
     }
 }
+
 
 
     public function update(Request $request, $id)

@@ -17,7 +17,8 @@ class Tugas extends Model
         'tenggat_tugas',
         'status',
         'id_kelas_mata_pelajaran',
-        'file'
+        'file',
+        'file_path'
     ];
 
     protected $casts = [

@@ -27,6 +27,7 @@ class SuratIzin extends Model
 
     protected $casts = [
         'read_status' => 'boolean',
+        'id_surat' => 'integer',
         'id_kelas' => 'integer',
         'id_user' => 'integer',
         'id_penerima' => 'integer',

@@ -101,18 +101,9 @@ class KelasController extends Controller
 
     public function getKelasByUserId(Request $request)
     {
-        // Mendapatkan user yang terautentikasi
-        // $user = Auth::user();
-        $user = User::where('id', 1)
-                ->get();
+        $user = Auth::user();
 
-        // Pastikan user terautentikasi
-        if (!$user) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        // Mengambil data kelas yang terkait dengan user yang terautentikasi
-        $kelas = KelasUser::where('id_user', 1);
+        $kelas = $user->kelas()->get();
 
         return response()->json($kelas, 200);
     }

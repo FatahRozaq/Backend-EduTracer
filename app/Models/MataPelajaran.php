@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class MataPelajaran extends Model
 {
     use HasFactory;
-    protected $table = 'mata_pelajaran';
 
+    protected $table = 'mata_pelajaran';
     protected $primaryKey = 'id_mata_pelajaran';
 
     protected $fillable = [
@@ -19,6 +19,7 @@ class MataPelajaran extends Model
         'id_user'
     ];
 
+
     protected $casts = [
         'id_mata_pelajaran' => 'integer',
         'id_user' => 'integer',
@@ -27,18 +28,22 @@ class MataPelajaran extends Model
     public function kelas()
     {
         return $this->belongsToMany(Kelas::class, 'kelas_mata_pelajaran', 'id_mata_pelajaran', 'id_kelas')
-            // ->using(KelasMataPelajaran::class)
             ->withTimestamps()
             ->withPivot('id_kelas_mata_pelajaran');
     }
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'id');
+        return $this->belongsTo(User::class, 'id_user');
     }
 
     public function pengajar()
     {
         return $this->hasMany(PengajarMapel::class, 'id_mata_pelajaran');
+    }
+
+    public function jadwals()
+    {
+        return $this->hasMany(Jadwal::class, 'id_mata_pelajaran');
     }
 }

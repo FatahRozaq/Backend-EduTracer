@@ -17,7 +17,7 @@ class Jadwal extends Model
         'id_mata_pelajaran',
         'hari',
         'jam_mulai',
-        'jam_akhir',
+        'jam_akhir'
     ];
 
     protected $casts = [
@@ -34,5 +34,10 @@ class Jadwal extends Model
     public function mataPelajaran()
     {
         return $this->belongsTo(MataPelajaran::class, 'id_mata_pelajaran');
+    }
+
+    public function pengajarMapel()
+    {
+        return $this->belongsToMany(User::class, 'pengajar_mapel', 'id_mata_pelajaran', 'id_user');
     }
 }

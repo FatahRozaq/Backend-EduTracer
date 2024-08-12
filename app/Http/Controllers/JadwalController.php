@@ -105,7 +105,7 @@ class JadwalController extends Controller
 
     public function destroy($id)
     {
-        $jadwal = Jadwal::findOrFail($id);
+        $jadwal = Jadwal::where('id_jadwal', $id)->firstOrFail();
 
         try {
             $jadwal->delete();

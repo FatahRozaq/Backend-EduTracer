@@ -38,6 +38,12 @@ class Jadwal extends Model
 
     public function pengajarMapel()
     {
-        return $this->belongsToMany(User::class, 'pengajar_mapel', 'id_mata_pelajaran', 'id_user');
+        return $this->belongsToMany(User::class, 'pengajar_mapel', 'id_mata_pelajaran', 'id_user')
+                    ->withTimestamps();
+    }
+
+    public function jadwalPengajar()
+    {
+        return $this->hasMany(JadwalPengajar::class, 'id_jadwal');
     }
 }

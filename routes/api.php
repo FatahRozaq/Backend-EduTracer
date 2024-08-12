@@ -42,8 +42,7 @@ Route::middleware('auth:sanctum')->put('/jadwal/{id}', [JadwalController::class,
 Route::middleware('auth:sanctum')->delete('/jadwal/{id}', [JadwalController::class, 'destroy']);
 
 //jadwal Pengajar
-Route::get('jadwal-pengajar', [JadwalPengajarController::class, 'getJadwalPengajar']);
-
+Route::middleware('auth:sanctum')->get('jadwal-pengajar', [JadwalPengajarController::class, 'getJadwalPengajar']);
 
 
 //Tugas Legacy

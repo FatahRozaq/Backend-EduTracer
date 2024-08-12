@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Jadwal;
+use App\Models\PengajarMapel;
+use Illuminate\Support\Facades\Log;
 
 class JadwalPengajarController extends Controller
 {

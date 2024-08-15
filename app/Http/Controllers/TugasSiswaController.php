@@ -2,29 +2,97 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\KelasMataPelajaran;
+use App\Models\Tugas;
 use Illuminate\Http\Request;
 use App\Models\TugasKelasMataPelajaran;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class TugasSiswaController extends Controller
 {
-    public function index()
-    {
-        try {
-            $data = TugasKelasMataPelajaran::all();
-            return response()->json([
-                'success' => true,
-                'data' => $data
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve data',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+    public function index($idKelas)
+{
+    try {
+        // $idKelas = $request->input('id_kelas');
+
+        // Mengambil id_kelas_mata_pelajaran berdasarkan id_kelas
+        $kelas = KelasMataPelajaran::where('id_kelas', $idKelas)->pluck('id_kelas_mata_pelajaran');
+        
+        // Mengambil tugas dan melakukan eager loading untuk relasi kelas dan mata pelajaran
+        $tugas = Tugas::with(['kelasMataPelajaran.kelas', 'kelasMataPelajaran.mataPelajaran'])
+            ->whereIn('id_kelas_mata_pelajaran', $kelas)
+            ->get();
+        
+        // Membentuk data response dengan tugas, nama kelas, dan nama mata pelajaran
+        $data = $tugas->map(function ($item) {
+            return [
+                'id_tugas' => $item->id_tugas,
+                'nama_tugas' => $item->nama_tugas,
+                'deskripsi' => $item->deskripsi,
+                'tenggat_tugas' => $item->tenggat_tugas,
+                'status' => $item->status,
+                'file' => $item->file,
+                'file_path' => $item->file_path,
+                'nama_kelas' => $item->kelasMataPelajaran->kelas->nama_kelas ?? null,
+                'nama_mapel' => $item->kelasMataPelajaran->mataPelajaran->nama_mapel ?? null,
+            ];
+        });
+
+        $number = 10;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data tugas berhasil diambil',
+            'data' => $data
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to retrieve data',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
+public function showById($idTugas)
+{
+    try {
+        // Mengambil tugas berdasarkan id_tugas dengan eager loading untuk relasi kelas dan mata pelajaran
+        $tugas = Tugas::with(['kelasMataPelajaran.kelas', 'kelasMataPelajaran.mataPelajaran'])
+            ->findOrFail($idTugas);
+        
+        // Membentuk data response dengan tugas, nama kelas, dan nama mata pelajaran
+        $data = [
+            'id_tugas' => $tugas->id_tugas,
+            'nama_tugas' => $tugas->nama_tugas,
+            'deskripsi' => $tugas->deskripsi,
+            'tenggat_tugas' => $tugas->tenggat_tugas,
+            'status' => $tugas->status,
+            'file' => $tugas->file,
+            'file_path' => $tugas->file_path,
+            'id_kelas_mata_pelajaran' => $tugas->id_kelas_mata_pelajaran,
+            'nama_kelas' => $tugas->kelasMataPelajaran->kelas->nama_kelas ?? null,
+            'nama_mapel' => $tugas->kelasMataPelajaran->mataPelajaran->nama_mapel ?? null,
+        ];
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Detail tugas berhasil diambil',
+            'data' => $data
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to retrieve data',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+
+
 
     // Show data by ID
     public function show($id)

@@ -62,8 +62,8 @@ Route::put('/guru/tugas/nama-tugas/{nama_tugas}', [TugasController::class, 'edit
 Route::delete('/guru/tugas/delete/{nama_tugas}', [TugasController::class, 'deleteTugasByNama']);
 
 // Pengumpulan Tugas Siswa
-Route::get('tugas/siswa', [TugasSiswaController::class, 'index']);
-Route::get('tugas/siswa/{id}', [TugasSiswaController::class, 'show']);
+Route::get('tugas/siswa/data/{id_kelas}', [TugasSiswaController::class, 'index']);
+Route::get('tugas/siswa/{id}', [TugasSiswaController::class, 'showById']);
 Route::post('tugas/siswa', [TugasSiswaController::class, 'store']);
 Route::put('tugas/siswa/{id}', [TugasSiswaController::class, 'update']);
 Route::delete('tugas/siswa/{id}', [TugasSiswaController::class, 'destroy']);

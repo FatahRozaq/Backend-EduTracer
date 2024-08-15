@@ -169,7 +169,7 @@ public function store(Request $request)
         } elseif ($tenggatTugas->month == $now->month) {
             $status = 'Bulan ini';
         } else {
-            $status = 'Di luar bulan ini';
+            $status = 'Sudah lewat tenggat';
         }
 
         // Tambahkan status ke dalam data yang divalidasi
@@ -194,8 +194,6 @@ public function store(Request $request)
                 $validatedData['file_path'] = $path;
                 // return response()->json($validatedData['file_path']);
             }
-        } else {
-            return response()->json($idKelas);
         }
 
         // Buat entri tugas baru

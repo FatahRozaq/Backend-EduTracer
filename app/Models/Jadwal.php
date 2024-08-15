@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth; 
 
 class Jadwal extends Model
 {
@@ -38,8 +39,8 @@ class Jadwal extends Model
 
     public function pengajarMapel()
     {
-        return $this->belongsToMany(User::class, 'pengajar_mapel', 'id_mata_pelajaran', 'id_user')
-                    ->withTimestamps();
+        return $this->hasMany(PengajarMapel::class, 'id_mata_pelajaran', 'id_mata_pelajaran')
+            ->where('id_user', Auth::id());
     }
 
     public function jadwalPengajar()

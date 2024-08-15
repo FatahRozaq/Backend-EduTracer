@@ -29,48 +29,39 @@ class SuratIzinController extends Controller
 
     public function store(Request $request)
     {
-        try {
-            Log::info('Data received:', $request->all());
+        // Validasi input
+        $request->validate([
+            'id_user' => 'required|integer',
+            'id_penerima' => 'required|integer',
+            'id_kelas' => 'required|integer',
+            'id_anak' => 'required|integer',
+            'tanggal' => 'required|date',
+            'jenis_surat' => 'required|string',
+            'deskripsi' => 'required|string',
+            'berkas_surat' => 'nullable|file|mimes:jpg,png,jpeg,pdf|max:4096',
+        ]);
 
-            $request->validate([
-                'id_user' => 'required|integer',
-                'id_penerima' => 'required|integer',
-                'id_kelas' => 'required|integer',
-                'id_anak' => 'required|integer',
-                'tanggal' => 'required|date',
-                'jenis_surat' => 'required|string',
-                'deskripsi' => 'required|string',
-                'berkas_surat' => 'nullable|file|mimes:jpg,png,jpeg,pdf|max:2048',
-            ]);
+        // Buat instance model SuratIzin
+        $suratIzin = new SuratIzin();
+        $suratIzin->id_user = $request->id_user;
+        $suratIzin->id_penerima = $request->id_penerima;
+        $suratIzin->id_kelas = $request->id_kelas;
+        $suratIzin->id_anak = $request->id_anak;
+        $suratIzin->tanggal = $request->tanggal;
+        $suratIzin->jenis_surat = $request->jenis_surat;
+        $suratIzin->deskripsi = $request->deskripsi;
 
-            Log::info('Validation passed.');
-
-            $suratIzin = new SuratIzin();
-            $suratIzin->id_user = $request->id_user;
-            $suratIzin->id_penerima = $request->id_penerima;
-            $suratIzin->id_kelas = $request->id_kelas;
-            $suratIzin->id_anak = $request->id_anak;
-            $suratIzin->tanggal = $request->tanggal;
-            $suratIzin->jenis_surat = $request->jenis_surat;
-            $suratIzin->deskripsi = $request->deskripsi;
-
-            if ($request->hasFile('berkas_surat')) {
-                Log::info('File is present.');
-                $file = $request->file('berkas_surat');
-                $path = $file->store('surat_izin', 'public');
-                Log::info('File stored at: ' . $path);
-                $suratIzin->berkas_surat = $path;
-            }
-
-            $suratIzin->save();
-            Log::info('Surat Izin saved.');
-
-            return response()->json(['message' => 'Surat Izin berhasil dikirim'], 201);
-        } catch (\Exception $e) {
-            Log::error('Error storing surat izin:', ['error' => $e->getMessage()]);
-            return response()->json(['error' => $e->getMessage()], 500);
+        if ($request->hasFile('berkas_surat')) {
+            $file = $request->file('berkas_surat');
+            $path = $file->store('surat_izin', 'public');
+            $suratIzin->berkas_surat = $path;
         }
+
+        $suratIzin->save();
+
+        return response()->json(['message' => 'Surat Izin berhasil dikirim'], 201);
     }
+
 
     public function show($id)
     {

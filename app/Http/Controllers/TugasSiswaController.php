@@ -176,7 +176,7 @@ class TugasSiswaController extends Controller
             'id_kelas_mata_pelajaran' => 'required|integer',
             'id_user' => 'required|integer',
             'status' => 'required|string',
-            'berkas' => 'required|file|max:4096', // 4MB in kilobytes
+            'berkas' => 'nullable|file|max:4096', // 4MB in kilobytes
             'nilai_tugas' => 'nullable|numeric',
         ]);
 

@@ -158,7 +158,9 @@ public function store(Request $request)
         $endOfMonthNow = $now->copy()->endOfMonth();
 
         // Determine the status based on the deadline
-        if ($tenggatTugas->isToday()) {
+        if ($tenggatTugas->isPast()) {
+            $status = 'Lewat'; // Status baru untuk tugas yang sudah lewat tenggat
+        } elseif($tenggatTugas->isToday()) {
             $status = 'Hari ini';
         } elseif ($tenggatTugas->isTomorrow()) {
             $status = 'Besok';
@@ -168,8 +170,8 @@ public function store(Request $request)
             $status = 'Minggu depan';
         } elseif ($tenggatTugas->month == $now->month) {
             $status = 'Bulan ini';
-        } else {
-            $status = 'Sudah lewat tenggat';
+        }  else {
+            $status = 'Diluar bulan ini';
         }
 
         // Tambahkan status ke dalam data yang divalidasi

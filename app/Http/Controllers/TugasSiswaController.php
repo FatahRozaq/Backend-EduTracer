@@ -8,14 +8,23 @@ use Illuminate\Http\Request;
 use App\Models\TugasKelasMataPelajaran;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class TugasSiswaController extends Controller
 {
+    public function __construct()
+    {
+        Carbon::setLocale('id');
+    }
+
+    private function getCurrentTime()
+    {
+        return Carbon::now('Asia/Jakarta');
+    }
+
     public function index($idKelas)
 {
     try {
-        // $idKelas = $request->input('id_kelas');
-
         // Mengambil id_kelas_mata_pelajaran berdasarkan id_kelas
         $kelas = KelasMataPelajaran::where('id_kelas', $idKelas)->pluck('id_kelas_mata_pelajaran');
         
@@ -23,9 +32,55 @@ class TugasSiswaController extends Controller
         $tugas = Tugas::with(['kelasMataPelajaran.kelas', 'kelasMataPelajaran.mataPelajaran'])
             ->whereIn('id_kelas_mata_pelajaran', $kelas)
             ->get();
-        
+
+        // Ambil waktu saat ini
+        $now = $this->getCurrentTime();
+        $startOfWeekNow = $now->copy()->startOfWeek();
+        $endOfWeekNow = $now->copy()->endOfWeek();
+        $startOfNextWeek = $startOfWeekNow->copy()->addWeek();
+        $endOfNextWeek = $endOfWeekNow->copy()->addWeek();
+        $endOfMonthNow = $now->copy()->endOfMonth();
+
+        // Loop untuk memperbarui status tugas
+        foreach ($tugas as $item) {
+            $tenggatTugas = Carbon::parse($item->tenggat_tugas, 'Asia/Jakarta');
+
+            if ($tenggatTugas->isPast()) {
+                $item->status = 'Lewat'; // Status baru untuk tugas yang sudah lewat tenggat
+            } elseif ($tenggatTugas->isToday()) {
+                $item->status = 'Hari ini';
+            } elseif ($tenggatTugas->isTomorrow()) {
+                $item->status = 'Besok';
+            } elseif ($tenggatTugas->between($startOfWeekNow, $endOfWeekNow)) {
+                $item->status = 'Minggu ini';
+            } elseif ($tenggatTugas->between($startOfNextWeek, $endOfNextWeek)) {
+                $item->status = 'Minggu depan';
+            } elseif ($tenggatTugas->month == $now->month) {
+                $item->status = 'Bulan ini';
+            } else {
+                $item->status = 'Diluar bulan ini';
+            }
+
+            // Simpan perubahan status
+            $item->save();
+        }
+
+        // Mengurutkan berdasarkan status dan kemudian tenggat_tugas
+        $sortedData = $tugas->sortBy(function ($item) {
+            $statusOrder = [
+                'Lewat' => 1,
+                'Hari ini' => 2,
+                'Besok' => 3,
+                'Minggu ini' => 4,
+                'Minggu depan' => 5,
+                'Bulan ini' => 6,
+                'Diluar bulan ini' => 7,
+            ];
+            return $statusOrder[$item->status] ?? 8;
+        })->sortBy('tenggat_tugas')->values(); // Mengurutkan berdasarkan tenggat_tugas setelah sorting status
+
         // Membentuk data response dengan tugas, nama kelas, dan nama mata pelajaran
-        $data = $tugas->map(function ($item) {
+        $data = $sortedData->map(function ($item) {
             return [
                 'id_tugas' => $item->id_tugas,
                 'nama_tugas' => $item->nama_tugas,
@@ -38,8 +93,6 @@ class TugasSiswaController extends Controller
                 'nama_mapel' => $item->kelasMataPelajaran->mataPelajaran->nama_mapel ?? null,
             ];
         });
-
-        $number = 10;
 
         return response()->json([
             'success' => true,
@@ -55,40 +108,44 @@ class TugasSiswaController extends Controller
     }
 }
 
-public function showById($idTugas)
-{
-    try {
-        // Mengambil tugas berdasarkan id_tugas dengan eager loading untuk relasi kelas dan mata pelajaran
-        $tugas = Tugas::with(['kelasMataPelajaran.kelas', 'kelasMataPelajaran.mataPelajaran'])
-            ->findOrFail($idTugas);
-        
-        // Membentuk data response dengan tugas, nama kelas, dan nama mata pelajaran
-        $data = [
-            'id_tugas' => $tugas->id_tugas,
-            'nama_tugas' => $tugas->nama_tugas,
-            'deskripsi' => $tugas->deskripsi,
-            'tenggat_tugas' => $tugas->tenggat_tugas,
-            'status' => $tugas->status,
-            'file' => $tugas->file,
-            'file_path' => $tugas->file_path,
-            'id_kelas_mata_pelajaran' => $tugas->id_kelas_mata_pelajaran,
-            'nama_kelas' => $tugas->kelasMataPelajaran->kelas->nama_kelas ?? null,
-            'nama_mapel' => $tugas->kelasMataPelajaran->mataPelajaran->nama_mapel ?? null,
-        ];
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Detail tugas berhasil diambil',
-            'data' => $data
-        ], 200);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to retrieve data',
-            'error' => $e->getMessage()
-        ], 500);
+
+
+
+    public function showById($idTugas)
+    {
+        try {
+            // Mengambil tugas berdasarkan id_tugas dengan eager loading untuk relasi kelas dan mata pelajaran
+            $tugas = Tugas::with(['kelasMataPelajaran.kelas', 'kelasMataPelajaran.mataPelajaran'])
+                ->findOrFail($idTugas);
+            
+            // Membentuk data response dengan tugas, nama kelas, dan nama mata pelajaran
+            $data = [
+                'id_tugas' => $tugas->id_tugas,
+                'nama_tugas' => $tugas->nama_tugas,
+                'deskripsi' => $tugas->deskripsi,
+                'tenggat_tugas' => $tugas->tenggat_tugas,
+                'status' => $tugas->status,
+                'file' => $tugas->file,
+                'file_path' => $tugas->file_path,
+                'id_kelas_mata_pelajaran' => $tugas->id_kelas_mata_pelajaran,
+                'nama_kelas' => $tugas->kelasMataPelajaran->kelas->nama_kelas ?? null,
+                'nama_mapel' => $tugas->kelasMataPelajaran->mataPelajaran->nama_mapel ?? null,
+            ];
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Detail tugas berhasil diambil',
+                'data' => $data
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-}
 
 
 
@@ -119,7 +176,7 @@ public function showById($idTugas)
             'id_kelas_mata_pelajaran' => 'required|integer',
             'id_user' => 'required|integer',
             'status' => 'required|string',
-            'berkas' => 'nullable|file|max:4096', // 4MB in kilobytes
+            'berkas' => 'required|file|max:4096', // 4MB in kilobytes
             'nilai_tugas' => 'nullable|numeric',
         ]);
 
@@ -135,8 +192,17 @@ public function showById($idTugas)
 
             if ($request->hasFile('berkas')) {
                 $file = $request->file('berkas');
-                $filePath = $file->store('public/tugas_files'); // Store the file in the 'public/tugas_files' directory
-                $data['berkas'] = $filePath;
+            
+                // Ensure a valid uploaded file
+                if ($file->isValid()) {
+                    // Generate a unique filename using timestamp and original name
+                    $filename = $file->getClientOriginalName();
+            
+                    // Store the file in the 'uploads/tugas' directory within the 'public' disk
+                    $path = $file->storeAs('uploads/tugas_siswa', $filename, 'public');
+
+                    $data['berkas'] = $path;
+                }
             }
 
             $tugasKelasMataPelajaran = TugasKelasMataPelajaran::create($data);

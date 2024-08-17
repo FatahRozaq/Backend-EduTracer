@@ -23,7 +23,7 @@ class TugasSiswaController extends Controller
     }
 
     public function index($idKelas)
-{
+    {
     try {
         // Mengambil id_kelas_mata_pelajaran berdasarkan id_kelas
         $kelas = KelasMataPelajaran::where('id_kelas', $idKelas)->pluck('id_kelas_mata_pelajaran');
@@ -107,10 +107,6 @@ class TugasSiswaController extends Controller
         ], 500);
     }
 }
-
-
-
-
 
     public function showById($idTugas)
     {
@@ -332,4 +328,168 @@ class TugasSiswaController extends Controller
             ], 500);
         }
     }
+
+    public function indexBaru($idKelas, $idUser)
+    {
+        try {
+            // Mengambil id_kelas_mata_pelajaran berdasarkan id_kelas
+            $kelasMataPelajaran = KelasMataPelajaran::where('id_kelas', $idKelas)->pluck('id_kelas_mata_pelajaran');
+            
+            // Mengambil tugas_kelas_mata_pelajaran dan melakukan eager loading untuk relasi tugas, kelas, dan mata pelajaran
+            $tugasKelasMataPelajaran = TugasKelasMataPelajaran::with([
+                'tugas.kelasMataPelajaran.kelas',
+                'tugas.kelasMataPelajaran.mataPelajaran'
+            ])
+            ->whereIn('id_kelas_mata_pelajaran', $kelasMataPelajaran)
+            ->where('id_user', $idUser) // Filter berdasarkan id_user
+            ->get();
+
+            // Ambil waktu saat ini
+            $now = $this->getCurrentTime();
+            $startOfWeekNow = $now->copy()->startOfWeek();
+            $endOfWeekNow = $now->copy()->endOfWeek();
+            $startOfNextWeek = $startOfWeekNow->copy()->addWeek();
+            $endOfNextWeek = $endOfWeekNow->copy()->addWeek();
+            $endOfMonthNow = $now->copy()->endOfMonth();
+
+            // Loop untuk memperbarui status tugas
+            foreach ($tugasKelasMataPelajaran as $item) {
+                $tenggatTugas = Carbon::parse($item->tugas->tenggat_tugas, 'Asia/Jakarta');
+
+                if ($tenggatTugas->isPast()) {
+                    $item->tugas->status = 'Lewat'; // Status baru untuk tugas yang sudah lewat tenggat
+                } elseif ($tenggatTugas->isToday()) {
+                    $item->tugas->status = 'Hari ini';
+                } elseif ($tenggatTugas->isTomorrow()) {
+                    $item->tugas->status = 'Besok';
+                } elseif ($tenggatTugas->between($startOfWeekNow, $endOfWeekNow)) {
+                    $item->tugas->status = 'Minggu ini';
+                } elseif ($tenggatTugas->between($startOfNextWeek, $endOfNextWeek)) {
+                    $item->tugas->status = 'Minggu depan';
+                } elseif ($tenggatTugas->month == $now->month) {
+                    $item->tugas->status = 'Bulan ini';
+                } else {
+                    $item->tugas->status = 'Diluar bulan ini';
+                }
+
+                // Simpan perubahan status
+                $item->tugas->save();
+            }
+
+            // Mengurutkan berdasarkan status dan kemudian tenggat_tugas
+            $sortedData = $tugasKelasMataPelajaran->sortBy(function ($item) {
+                $statusOrder = [
+                    'Lewat' => 1,
+                    'Hari ini' => 2,
+                    'Besok' => 3,
+                    'Minggu ini' => 4,
+                    'Minggu depan' => 5,
+                    'Bulan ini' => 6,
+                    'Diluar bulan ini' => 7,
+                ];
+                return $statusOrder[$item->tugas->status] ?? 8;
+            })->sortBy('tugas.tenggat_tugas')->values(); // Mengurutkan berdasarkan tenggat_tugas setelah sorting status
+
+            // Membentuk data response dengan tugas, nama kelas, dan nama mata pelajaran
+            $data = $sortedData->map(function ($item) {
+                return [
+                    'id_tugas_kelas_mata_pelajaran' => $item->id_tugas_kelas_mata_pelajaran,
+                    'id_tugas' => $item->tugas->id_tugas,
+                    'nama_tugas' => $item->tugas->nama_tugas,
+                    'deskripsi' => $item->tugas->deskripsi,
+                    'tenggat_tugas' => $item->tugas->tenggat_tugas,
+                    'status' => $item->tugas->status,
+                    'file' => $item->tugas->file,
+                    'file_path' => $item->tugas->file_path,
+                    'nilai_tugas' => $item->nilai_tugas,
+                    'id_user' => $item->id_user, // Menampilkan id_user
+                    'status_pengumpulan' => $item->status, // Menampilkan status sebagai status_pengumpulan
+                    'berkas' => $item->berkas, // Menampilkan berkas
+                    'nama_kelas' => $item->tugas->kelasMataPelajaran->kelas->nama_kelas ?? null,
+                    'nama_mapel' => $item->tugas->kelasMataPelajaran->mataPelajaran->nama_mapel ?? null,
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data tugas berhasil diambil',
+                'data' => $data
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function pengumpulanTugas(Request $request, $idTugas)
+    {
+        try {
+            // Validasi data request
+            $validatedData = $request->validate([
+                'berkas' => 'required|file|max:4096|mimes:jpg,jpeg,png,pdf,doc,docx'
+            ]);
+
+
+            // Cari entri TugasKelasMataPelajaran berdasarkan id_tugas_kelas_mata_pelajaran
+            $tugasKelasMataPelajaran = TugasKelasMataPelajaran::find($idTugas);
+
+            // Periksa apakah entri ditemukan
+            if (!$tugasKelasMataPelajaran) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tugas Kelas Mata Pelajaran tidak ditemukan.',
+                ], 404);
+            }
+
+            // Handle file upload
+            if ($request->hasFile('berkas')) {
+                $file = $request->file('berkas');
+            
+                // Ensure a valid uploaded file
+                if ($file->isValid()) {
+                    // Generate a unique filename using timestamp and original name
+                    $filename = $file->getClientOriginalName();
+            
+                    // Store the file in the 'uploads/tugas_siswa' directory within the 'public' disk
+                    $path = $file->storeAs('uploads/tugas_siswa', $filename, 'public');
+                    
+                    // Add the file path to the model
+                    $tugasKelasMataPelajaran->berkas = $path;
+                }
+            } else {
+                return response()->json("Gagal");   
+            }
+
+            // Set the status to 'Sudah mengumpulkan'
+            $tugasKelasMataPelajaran->status = 'Sudah mengumpulkan';
+
+            // Simpan perubahan
+            $tugasKelasMataPelajaran->save();
+
+            // Kembalikan respons sukses
+            return response()->json([
+                'success' => true,
+                'message' => 'Berkas berhasil diunggah dan status diperbarui.',
+                'data' => $tugasKelasMataPelajaran
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Kembalikan respons kesalahan validasi
+            return response()->json([
+                'success' => false,
+                'message' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            // Kembalikan respons kesalahan umum
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

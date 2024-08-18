@@ -108,62 +108,40 @@ class TugasSiswaController extends Controller
     }
 }
 
-    public function showById($idTugas)
-    {
-        try {
-            // Mengambil tugas berdasarkan id_tugas dengan eager loading untuk relasi kelas dan mata pelajaran
-            $tugas = Tugas::with(['kelasMataPelajaran.kelas', 'kelasMataPelajaran.mataPelajaran'])
-                ->findOrFail($idTugas);
+    // public function showById($idTugas)
+    // {
+    //     try {
+    //         // Mengambil tugas berdasarkan id_tugas dengan eager loading untuk relasi kelas dan mata pelajaran
+    //         $tugas = Tugas::with(['kelasMataPelajaran.kelas', 'kelasMataPelajaran.mataPelajaran'])
+    //             ->findOrFail($idTugas);
             
-            // Membentuk data response dengan tugas, nama kelas, dan nama mata pelajaran
-            $data = [
-                'id_tugas' => $tugas->id_tugas,
-                'nama_tugas' => $tugas->nama_tugas,
-                'deskripsi' => $tugas->deskripsi,
-                'tenggat_tugas' => $tugas->tenggat_tugas,
-                'status' => $tugas->status,
-                'file' => $tugas->file,
-                'file_path' => $tugas->file_path,
-                'id_kelas_mata_pelajaran' => $tugas->id_kelas_mata_pelajaran,
-                'nama_kelas' => $tugas->kelasMataPelajaran->kelas->nama_kelas ?? null,
-                'nama_mapel' => $tugas->kelasMataPelajaran->mataPelajaran->nama_mapel ?? null,
-            ];
+    //         // Membentuk data response dengan tugas, nama kelas, dan nama mata pelajaran
+    //         $data = [
+    //             'id_tugas' => $tugas->id_tugas,
+    //             'nama_tugas' => $tugas->nama_tugas,
+    //             'deskripsi' => $tugas->deskripsi,
+    //             'tenggat_tugas' => $tugas->tenggat_tugas,
+    //             'status' => $tugas->status,
+    //             'file' => $tugas->file,
+    //             'file_path' => $tugas->file_path,
+    //             'id_kelas_mata_pelajaran' => $tugas->id_kelas_mata_pelajaran,
+    //             'nama_kelas' => $tugas->kelasMataPelajaran->kelas->nama_kelas ?? null,
+    //             'nama_mapel' => $tugas->kelasMataPelajaran->mataPelajaran->nama_mapel ?? null,
+    //         ];
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Detail tugas berhasil diambil',
-                'data' => $data
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve data',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-
-
-
-
-    // Show data by ID
-    public function show($id)
-    {
-        try {
-            $data = TugasKelasMataPelajaran::findOrFail($id);
-            return response()->json([
-                'success' => true,
-                'data' => $data
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data not found',
-                'error' => $e->getMessage()
-            ], 404);
-        }
-    }
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Detail tugas berhasil diambil',
+    //             'data' => $data
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to retrieve data',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 
     public function store(Request $request)
     {
@@ -425,30 +403,40 @@ class TugasSiswaController extends Controller
     }
 
     public function pengumpulanTugas(Request $request, $idTugas)
-    {
-        try {
-            // Validasi data request
-            $validatedData = $request->validate([
-                'berkas' => 'required|file|max:4096|mimes:jpg,jpeg,png,pdf,doc,docx'
-            ]);
+{
+    try {
+        // Validasi data request menggunakan Validator secara manual
+        $validator = Validator::make($request->all(), [
+            'berkas.*' => 'required|file|max:11000|mimes:jpg,jpeg,png,pdf,doc,docx,zip,rar'
+        ]);
 
+        // Jika validasi gagal
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+            ], 422);
+        }
 
-            // Cari entri TugasKelasMataPelajaran berdasarkan id_tugas_kelas_mata_pelajaran
-            $tugasKelasMataPelajaran = TugasKelasMataPelajaran::find($idTugas);
+        // Validasi berhasil
+        $validatedData = $validator->validated();
 
-            // Periksa apakah entri ditemukan
-            if (!$tugasKelasMataPelajaran) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tugas Kelas Mata Pelajaran tidak ditemukan.',
-                ], 404);
-            }
+        // Cari entri TugasKelasMataPelajaran berdasarkan id_tugas_kelas_mata_pelajaran
+        $tugasKelasMataPelajaran = TugasKelasMataPelajaran::find($idTugas);
 
-            // Handle file upload
-            if ($request->hasFile('berkas')) {
-                $file = $request->file('berkas');
-            
-                // Ensure a valid uploaded file
+        // Periksa apakah entri ditemukan
+        if (!$tugasKelasMataPelajaran) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tugas Kelas Mata Pelajaran tidak ditemukan.',
+            ], 404);
+        }
+
+        // Handle multiple file uploads
+        $filePaths = [];
+        if ($request->hasFile('berkas')) {
+            foreach ($request->file('berkas') as $file) {
+                // Pastikan file yang diunggah valid
                 if ($file->isValid()) {
                     // Generate a unique filename using timestamp and original name
                     $filename = $file->getClientOriginalName();
@@ -456,40 +444,94 @@ class TugasSiswaController extends Controller
                     // Store the file in the 'uploads/tugas_siswa' directory within the 'public' disk
                     $path = $file->storeAs('uploads/tugas_siswa', $filename, 'public');
                     
-                    // Add the file path to the model
-                    $tugasKelasMataPelajaran->berkas = $path;
+                    // Replace backslashes with forward slashes
+                    $normalizedPath = str_replace('\\', '/', $path);
+                    
+                    // Tambahkan path file ke array
+                    $filePaths[] = $normalizedPath;
                 }
-            } else {
-                return response()->json("Gagal");   
             }
 
-            // Set the status to 'Sudah mengumpulkan'
-            $tugasKelasMataPelajaran->status = 'Sudah mengumpulkan';
-
-            // Simpan perubahan
-            $tugasKelasMataPelajaran->save();
-
-            // Kembalikan respons sukses
-            return response()->json([
-                'success' => true,
-                'message' => 'Berkas berhasil diunggah dan status diperbarui.',
-                'data' => $tugasKelasMataPelajaran
-            ], 200);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Kembalikan respons kesalahan validasi
-            return response()->json([
-                'success' => false,
-                'message' => $e->errors(),
-            ], 422);
-        } catch (\Exception $e) {
-            // Kembalikan respons kesalahan umum
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred',
-                'error' => $e->getMessage()
-            ], 500);
+            // Simpan array file path ke kolom berkas dalam bentuk JSON
+            $tugasKelasMataPelajaran->berkas = json_encode($filePaths);
+        } else {
+            return response()->json("Gagal");
         }
+
+        // Set status menjadi 'Sudah mengumpulkan'
+        $tugasKelasMataPelajaran->status = 'Sudah mengumpulkan';
+
+        // Simpan perubahan
+        $tugasKelasMataPelajaran->save();
+
+        // Kembalikan respons sukses
+        return response()->json([
+            'success' => true,
+            'message' => 'Berkas berhasil diunggah dan status diperbarui.',
+            'data' => $tugasKelasMataPelajaran
+        ], 200);
+
+    } catch (\Exception $e) {
+        // Kembalikan respons kesalahan umum
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
+
+
+    public function showById($idTugasKelasMataPelajaran)
+{
+    try {
+        // Ambil tugas berdasarkan id_tugas_kelas_mata_pelajaran dengan eager loading relasi tugas, kelas, dan mata pelajaran
+        $tugasKelasMataPelajaran = TugasKelasMataPelajaran::with([
+            'tugas.kelasMataPelajaran.kelas',
+            'tugas.kelasMataPelajaran.mataPelajaran'
+        ])->where('id_tugas_kelas_mata_pelajaran', $idTugasKelasMataPelajaran)->first();
+
+        // Jika tugas tidak ditemukan, kembalikan respons 404
+        if (!$tugasKelasMataPelajaran) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tugas tidak ditemukan.',
+            ], 404);
+        }
+
+        // Membentuk data response dengan tugas, nama kelas, dan nama mata pelajaran
+        $data = [
+            'id_tugas_kelas_mata_pelajaran' => $tugasKelasMataPelajaran->id_tugas_kelas_mata_pelajaran,
+            'id_tugas' => $tugasKelasMataPelajaran->tugas->id_tugas,
+            'nama_tugas' => $tugasKelasMataPelajaran->tugas->nama_tugas,
+            'deskripsi' => $tugasKelasMataPelajaran->tugas->deskripsi,
+            'tenggat_tugas' => $tugasKelasMataPelajaran->tugas->tenggat_tugas,
+            'status' => $tugasKelasMataPelajaran->tugas->status,
+            'file' => $tugasKelasMataPelajaran->tugas->file,
+            'file_path' => $tugasKelasMataPelajaran->tugas->file_path,
+            'nilai_tugas' => $tugasKelasMataPelajaran->nilai_tugas,
+            'id_user' => $tugasKelasMataPelajaran->id_user,
+            'status_pengumpulan' => $tugasKelasMataPelajaran->status,
+            'berkas' => $tugasKelasMataPelajaran->berkas,
+            'nama_kelas' => $tugasKelasMataPelajaran->tugas->kelasMataPelajaran->kelas->nama_kelas ?? null,
+            'nama_mapel' => $tugasKelasMataPelajaran->tugas->kelasMataPelajaran->mataPelajaran->nama_mapel ?? null,
+        ];
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data tugas berhasil diambil',
+            'data' => $data
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to retrieve data',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
 
 }

@@ -70,7 +70,7 @@ Route::post('tugas/siswa', [TugasSiswaController::class, 'store']);
 // Route::put('tugas/siswa/{id}', [TugasSiswaController::class, 'update']);
 Route::delete('tugas/siswa/{id}', [TugasSiswaController::class, 'destroy']);
 Route::put('tugas/siswa/{id}/nilai-tugas', [TugasSiswaController::class, 'updateNilaiTugas']);
-Route::put('tugas/siswa/{id}/update', [TugasSiswaController::class, 'pengumpulanTugas']);
+Route::post('tugas/siswa/{id}/update', [TugasSiswaController::class, 'pengumpulanTugas']);
 
 
 // List Tugas Kelas Mapel

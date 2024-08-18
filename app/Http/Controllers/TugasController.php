@@ -665,8 +665,8 @@ public function store(Request $request)
 {
     try {
         // Ambil id_kelas dan id_mata_pelajaran dari request
-        $idKelas = $request['id_kelas'];
-        $idMapel = $request['id_mata_pelajaran'];
+        $idKelas = (int) $request->input('id_kelas');
+        $idMapel = (int) $request->input('id_mata_pelajaran');
 
         // Cari id_kelas_mata_pelajaran dari KelasMataPelajaran
         $kelasMapel = KelasMataPelajaran::where('id_kelas', $idKelas)

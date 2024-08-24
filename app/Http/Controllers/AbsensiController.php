@@ -157,7 +157,8 @@ class AbsensiController extends Controller
             $attendancesData = $request['attendances'];
             $idSubject = $request['idMataPelajaran'];
             $idSubjectClass = $request['idKelasMataPelajaran'];
-            $now = Carbon::parse($request['current_time']);
+            // $now = Carbon::parse($request['current_time']);
+            $now = $this->getCurrentTime();
             $dayName = $now->dayName;
 
             $schedule = Jadwal::where('id_kelas', $classId)
@@ -201,7 +202,8 @@ class AbsensiController extends Controller
             $attendancesData = $request['attendances'];
             $idSubject = $request['idMataPelajaran'];
             $idSubjectClass = $request['idKelasMataPelajaran'];
-            $now = Carbon::parse($request['current_time']);
+            // $now = Carbon::parse($request['current_time']);
+            $now = $this->getCurrentTime();
             $dayName = $now->dayName;
 
             $schedule = Jadwal::where('id_kelas', $classId)
@@ -279,10 +281,13 @@ class AbsensiController extends Controller
 {
     try {
         $userId = (int)$request['id_user'];
-        $now = Carbon::parse($request->input('current_time'));
+        
+        $now = $this->getCurrentTime();
         $dayName = $now->dayName;
+        return response()->json($dayName);
 
         $pengajars = JadwalPengajar::where('id_user', $userId)->get();
+        
         $jadwals = collect();
 
         foreach ($pengajars as $pengajar) {
@@ -306,7 +311,8 @@ class AbsensiController extends Controller
     {
         try {
             $idJadwal = $request['id_jadwal'];
-            $now = Carbon::parse($request->input('current_time'));
+            // $now = Carbon::parse($request->input('current_time'));
+            $now = $this->getCurrentTime();
 
             $absen = Absensi::where('id_jadwal', $idJadwal)
                         ->whereDate('tanggal', $now->format('Y-m-d'))

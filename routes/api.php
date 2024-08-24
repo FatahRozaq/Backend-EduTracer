@@ -17,6 +17,7 @@ use App\Http\Controllers\TugasSiswaController;
 use App\Http\Controllers\ParentChildController;
 use App\Http\Controllers\MataPelajaranController;
 use App\Http\Controllers\JadwalPengajarController;
+use App\Http\Controllers\TestController;
 use App\Http\Controllers\TugasKelasMataPelajaranController;
 
 
@@ -41,7 +42,6 @@ Route::middleware('auth:sanctum')->get('/jadwal/{id}', [JadwalController::class,
 Route::middleware('auth:sanctum')->put('/jadwal/{id}', [JadwalController::class, 'update']);
 Route::middleware('auth:sanctum')->delete('/jadwal/{id}', [JadwalController::class, 'destroy']);
 
-//jadwal Pengajar
 Route::middleware('auth:sanctum')->get('jadwal-pengajar', [JadwalPengajarController::class, 'getJadwalPengajar']);
 
 
